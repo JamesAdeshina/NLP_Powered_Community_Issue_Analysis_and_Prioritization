@@ -66,3 +66,6 @@ split_pdf("example.pdf", "output_pdfs", 5)   # Splits PDF every 5 pages
 split_word("Data/community_issues_letters.docx", "output_docs", 12)  # Splits Word file every 10 paragraphs
 
 
+# Example usage:
+split_word_to_pdf_and_pages("Data/community_issues_letters.docx", "output_pdfs", 1)  # Split Word by single pages (after conversion to PDF)
+
