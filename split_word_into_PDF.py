@@ -41,6 +41,6 @@ def split_word(input_docx, output_folder, paragraphs_per_split):
         print(f"Saved: {output_docx_path}")
 
 # Example usage
-#split_pdf("example.pdf", "output_pdfs", 5)   # Splits PDF every 5 pages
+split_pdf("example.pdf", "output_pdfs", 5)   # Splits PDF every 5 pages
 split_word("Data/community_issues_letters.docx", "output_docs", 12)  # Splits Word file every 10 paragraphs
 
