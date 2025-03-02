@@ -11,6 +11,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import LatentDirichletAllocation
 from nltk.sentiment import SentimentIntensityAnalyzer
+from textblob import TextBlob
+
 
 # ------------------ SSL Context for NLTK Downloads ------------------
 try:
@@ -307,17 +309,26 @@ def main():
 
     # Determine sentiment category
     compound_score = sentiment_scores['compound']
-    if compound_score >= 0.05:
-        sentiment_label = "Positive"
-    elif compound_score <= -0.05:
-        sentiment_label = "Negative"
+
+    # Adjusted thresholds
+    if compound_score >= 0.1:
+        sentiment_label = "Positive"  # A stronger positive threshold
+    elif compound_score <= -0.1:
+        sentiment_label = "Negative"  # A stronger negative threshold
     else:
-        sentiment_label = "Neutral"
+        sentiment_label = "Neutral"  # Neutral for scores between -0.1 and 0.1
 
     # Print sentiment results
     print("\nSentiment Analysis of Sample Letter:")
     print(sentiment_scores)
     print(f"Overall Sentiment: {sentiment_label}")
+
+    # Create a TextBlob object
+    blob = TextBlob(sample_text)
+
+    # Sentiment polarity (-1 to 1, where 1 is positive and -1 is negative)
+    print(f"Sentiment polarity: {blob.sentiment.polarity}")
+
 
 if __name__ == '__main__':
     main()
