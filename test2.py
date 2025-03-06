@@ -193,20 +193,22 @@ def label_clusters(vectorizer, kmeans,
 
 # ------------------ Topic Modeling ------------------
 
-def topic_modeling(texts, num_topics=5):
+def topic_modeling(texts, num_topics=1):
+
     """
     Apply LDA topic modeling on a list of texts to extract topics.
     Returns a list of topics with their top terms.
     """
-    vectorizer = TfidfVectorizer(stop_words='english')
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
     X = vectorizer.fit_transform(texts)
-    lda = LatentDirichletAllocation(n_components=num_topics, random_state=42)
+    lda = LatentDirichletAllocation(n_components=num_topics, random_state=42, learning_method='batch', max_iter=10)
     lda.fit(X)
     topics = []
     terms = vectorizer.get_feature_names_out()
     for topic_idx, topic in enumerate(lda.components_):
-        top_terms = [terms[i] for i in topic.argsort()[:-11:-1]]
-        topics.append("Topic {}: {}".format(topic_idx, ", ".join(top_terms)))
+        # Extract the top 5 terms
+        top_terms = [terms[i] for i in topic.argsort()[:-6:-1]]
+        topics.append(", ".join(top_terms))
     return topics
 
 
@@ -226,36 +228,78 @@ def extractive_summarization(text, sentence_count=3):
     return " ".join([str(sentence) for sentence in summary])
 
 
-def query_based_summarization(text, query, threshold=0.1):
+def query_based_summarization(text, query, threshold=0.1, top_n=2):
     sentences = sent_tokenize(text)
     if not sentences:
         return "No relevant information found for the query."
 
-    # Create a corpus containing all sentences plus the query.
+    # Build a TF-IDF model on the sentences plus the query.
     corpus = sentences + [query]
     vectorizer = TfidfVectorizer().fit(corpus)
-
     sentence_vectors = vectorizer.transform(sentences)
     query_vector = vectorizer.transform([query])
 
-    # Compute cosine similarity between the query and each sentence.
+    # Compute cosine similarity scores between each sentence and the query.
     scores = np.dot(sentence_vectors, query_vector.T).toarray().flatten()
 
-    if max(scores) < threshold:
+    # Select indices of sentences with scores above the threshold.
+    valid_indices = [i for i, score in enumerate(scores) if score >= threshold]
+    if not valid_indices:
         return "No relevant information found for the query."
 
-    best_sentence = sentences[np.argmax(scores)]
-    return best_sentence
+    # Sort these indices by score descending and take the top_n.
+    sorted_indices = sorted(valid_indices, key=lambda i: scores[i], reverse=True)[:top_n]
+
+    # Reorder the selected indices based on their original order in the text.
+    selected_indices = sorted(sorted_indices)
+
+    # Join the selected sentences to form the final summary.
+    summary = " ".join(sentences[i] for i in selected_indices)
+    return summary
+
 
 # ------------------ Sentiment Analysis ------------------
 
 def sentiment_analysis(text):
     """
     Perform sentiment analysis using VADER.
-    Returns a dictionary with sentiment scores.
+    Returns a dictionary with sentiment scores, a sentiment label,
+    and a dynamic explanation.
     """
     sia = SentimentIntensityAnalyzer()
-    return sia.polarity_scores(text)
+    scores = sia.polarity_scores(text)
+    compound = scores["compound"]
+
+    # Determine sentiment label based on compound score thresholds.
+    if compound >= 0.05:
+        sentiment_label = "Positive"
+    elif compound <= -0.05:
+        sentiment_label = "Negative"
+    else:
+        sentiment_label = "Neutral"
+
+    # Start building a dynamic explanation.
+    explanation = f"The sentiment of the text is {sentiment_label}."
+
+    # For negative sentiment, check for certain keywords and build an explanation.
+    if sentiment_label == "Negative":
+        details = []
+        lower_text = text.lower()
+        if "litter" in lower_text or "trash" in lower_text:
+            details.append("an increase in littering")
+        if "overflowing" in lower_text or "bins" in lower_text:
+            details.append("overflowing trash bins")
+        if "risk" in lower_text or "health" in lower_text:
+            details.append("associated health risks")
+
+        if details:
+            explanation += " Note based on sentiment; the author is highlighting concerns about " + \
+                           ", ".join(details) + ", which creates a sense of urgency and dissatisfaction."
+
+    # You can extend similar logic for Positive or Neutral sentiments if needed.
+
+    return {"scores": scores, "sentiment_label": sentiment_label, "explanation": explanation}
+
 
 
 # ------------------ Data Loading ------------------
