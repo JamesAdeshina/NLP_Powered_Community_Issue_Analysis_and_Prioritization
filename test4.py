@@ -34,7 +34,6 @@ nltk.download('vader_lexicon')
 
 
 # ------------------ Preprocessing Functions ------------------
-
 def remove_email_headers_and_footers(text):
     lines = text.split('\n')
     stripped_lines = [line.strip() for line in lines]
@@ -119,9 +118,9 @@ def comprehensive_text_preprocessing(text, use_lemmatization=True):
 
 
 # ------------------ Unsupervised Classification Functions ------------------
-
 def unsupervised_classification(texts, num_clusters=2):
-    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
+    # Use n-grams for richer feature representation.
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000, ngram_range=(1, 2))
     X = vectorizer.fit_transform(texts)
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     kmeans.fit(X)
@@ -129,9 +128,7 @@ def unsupervised_classification(texts, num_clusters=2):
 
 
 # ------------------ Dynamic Topic Labeling ------------------
-# Define candidate labels for our two categories.
 candidate_labels = ["Local Problem", "New Initiatives"]
-# Initialize a zero-shot classification pipeline.
 zero_shot_classifier = hf_pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 
@@ -140,7 +137,7 @@ def dynamic_label_clusters(vectorizer, kmeans):
     order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
     terms = vectorizer.get_feature_names_out()
     for i in range(kmeans.n_clusters):
-        # Extract top 10 terms for the cluster.
+        # Extract top 10 terms for each cluster.
         top_terms = [terms[ind] for ind in order_centroids[i, :10]]
         keyword_str = ", ".join(top_terms)
         result = zero_shot_classifier(keyword_str, candidate_labels)
@@ -150,9 +147,9 @@ def dynamic_label_clusters(vectorizer, kmeans):
 
 
 # ------------------ Topic Modeling ------------------
-
 def topic_modeling(texts, num_topics=1):
-    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
+    # Using n-grams to capture multi-word phrases.
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000, ngram_range=(1, 2))
     X = vectorizer.fit_transform(texts)
     lda = LatentDirichletAllocation(n_components=num_topics, random_state=42, learning_method='batch', max_iter=10)
     lda.fit(X)
@@ -164,11 +161,19 @@ def topic_modeling(texts, num_topics=1):
     return topics
 
 
+def dynamic_topic_label(keywords):
+    result = zero_shot_classifier(keywords, candidate_labels)
+    best_label = result["labels"][0]
+    return best_label
+
+
 # ------------------ Summarization Functions ------------------
+# Cache the abstractive summarizer so it's not reloaded each time.
+ABSTRACTIVE_SUMMARIZER = hf_pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
+
 
 def abstractive_summarization(text):
-    summarizer = hf_pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
-    summary = summarizer(text, max_length=50, min_length=25, do_sample=False)
+    summary = ABSTRACTIVE_SUMMARIZER(text, max_length=50, min_length=25, do_sample=False)
     return summary[0]['summary_text']
 
 
@@ -198,7 +203,6 @@ def query_based_summarization(text, query, threshold=0.1, top_n=2):
 
 
 # ------------------ Sentiment Analysis ------------------
-
 def sentiment_analysis(text):
     sia = SentimentIntensityAnalyzer()
     scores = sia.polarity_scores(text)
@@ -226,7 +230,6 @@ def sentiment_analysis(text):
 
 
 # ------------------ Data Loading ------------------
-
 def load_data(file_path):
     try:
         df = pd.read_csv(file_path, on_bad_lines='skip')
@@ -238,13 +241,13 @@ def load_data(file_path):
 
 
 # ------------------ Main Pipeline ------------------
-
 def main():
     file_path = "Data/processed/community_issues_dataset_template.csv"
     df = load_data(file_path)
     if df is None:
         return
 
+    # Preprocess texts
     df['clean_text'] = df['text'].apply(comprehensive_text_preprocessing)
     df = df[df['clean_text'].str.strip() != '']
     if df.empty:
@@ -256,9 +259,9 @@ def main():
         print("No valid texts for clustering.")
         return
 
-    # Unsupervised clustering
+    # Unsupervised clustering (using n-grams)
     labels, vectorizer, kmeans = unsupervised_classification(texts, num_clusters=2)
-    # Dynamic labeling for clusters
+    # Dynamic labeling for clusters using zero-shot classification
     cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
     df['classification'] = [cluster_mapping[label] for label in labels]
     print("\nClassification Distribution:")
@@ -283,8 +286,12 @@ def main():
     print("\nSample Letter Summaries:")
     print("Abstractive Summary:", abstractive_summarization(sample_text))
     print("Extractive Summary:", extractive_summarization(sample_text))
-    print("Query-based Summary (for query 'air pollution'):",
+    print("Query-based Summary 1 (for query 'air pollution'):",
           query_based_summarization(sample_text, query="air pollution"))
+    print("Query-based Summary 2 (for query 'What are the main concerns raised in the letter?'):",
+          query_based_summarization(sample_text, query="What are the main concerns raised in the letter?"))
+    print("Query-based Summary 3 (for query 'What actions are being urged in the letter?'):",
+          query_based_summarization(sample_text, query="What actions are being urged in the letter?"))
 
     sentiment_results = sentiment_analysis(sample_text)
     compound_score = sentiment_results["scores"]["compound"]
