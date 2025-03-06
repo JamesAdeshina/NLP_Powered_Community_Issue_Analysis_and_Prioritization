@@ -258,9 +258,10 @@ def main():
     print(sample_text)
     print("\nSample Letter Summaries:")
     print("Abstractive Summary:", abstractive_summarization(sample_text))
+    summary=abstractive_summarization(sample_text)
     print("Extractive Summary:", extractive_summarization(sample_text))
-    print("Query-based Summary (for query 'air pollution'):", query_based_summarization(sample_text, query="air pollution"))
-    sentiment_results = sentiment_analysis(sample_text)
+    print("Query-based Summary (for query 'What actions are being urged in the letter'):", query_based_summarization(sample_text, query="What actions are being urged in the letter"))
+    sentiment_results = sentiment_analysis(summary)
     compound_score = sentiment_results["scores"]["compound"]
     if compound_score >= 0.1:
         overall_sentiment = "Positive"
