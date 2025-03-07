@@ -1,5 +1,4 @@
 import os
-import io
 import ssl
 import re
 import emoji
@@ -41,6 +40,7 @@ nltk.download('vader_lexicon')
 
 
 # ------------------ Preprocessing Functions ------------------
+
 def remove_email_headers_and_footers(text):
     lines = text.split('\n')
     stripped_lines = [line.strip() for line in lines]
@@ -125,8 +125,8 @@ def comprehensive_text_preprocessing(text, use_lemmatization=True):
 
 
 # ------------------ Unsupervised Classification Functions ------------------
+
 def unsupervised_classification(texts, num_clusters=2):
-    # Using unigrams and bigrams for richer features.
     vectorizer = TfidfVectorizer(stop_words='english', max_features=1000, ngram_range=(1, 2))
     X = vectorizer.fit_transform(texts)
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
@@ -250,6 +250,9 @@ def sentiment_analysis(text):
 
 
 # ------------------ Aggregated Analysis Plot Functions ------------------
+import plotly.graph_objects as go
+
+
 def plot_classification_distribution(class_counts):
     fig = go.Figure([go.Bar(x=class_counts.index, y=class_counts.values)])
     fig.update_layout(title="Classification Distribution", xaxis_title="Category", yaxis_title="Count")
@@ -296,17 +299,22 @@ def load_data(file_path):
         return None
 
 
-# ------------------ Main UI Pipeline ------------------
+# ------------------ Main UI Pipeline Using Tabs ------------------
 def main():
-    # Sidebar Navigation with Logo
-    st.sidebar.image("src/img/Bolsover_District_Council_logo.svg", width=150)
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Data Entry", "Results", "Aggregated Analysis"])
+    st.set_page_config(layout="wide")
 
-    if page == "Data Entry":
+    # Display the Bolsover District Council logo in the sidebar
+    st.sidebar.image("src/img/Bolsover_District_Council_logo.svg", width=150)
+
+    # Create tabs for navigation
+    tab1, tab2, tab3 = st.tabs(["Data Entry", "Results", "Aggregated Analysis"])
+
+    # ------------------ Data Entry Tab ------------------
+    with tab1:
         st.title("Citizen Letter Data Entry")
         data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"])
         user_query = st.text_input("Enter Query for Summarization", "What actions are being urged in the letter?")
+
         if data_mode == "Paste Text":
             input_text = st.text_area("Paste your letter text here", height=200)
         else:
@@ -338,38 +346,46 @@ def main():
                         st.write("Error processing DOC/DOCX:", e)
                 else:
                     input_text = uploaded_file.read().decode("utf-8")
+
         if st.button("Submit"):
             st.session_state.input_text = input_text
             st.session_state.user_query = user_query
             st.session_state.data_mode = data_mode
-            st.success("Data saved. Navigate to 'Results' to see the analysis.")
+            st.success("Data saved. Switch to the 'Results' tab to see the analysis.")
 
-    elif page == "Results":
+    # ------------------ Results Tab ------------------
+    with tab2:
         st.title("Individual Letter Analysis")
         if "input_text" not in st.session_state or not st.session_state.input_text:
-            st.warning("No input data found. Please go to the Data Entry page and provide a letter.")
+            st.warning("No input data found. Please go to the 'Data Entry' tab and provide a letter.")
         else:
             letter_text = st.session_state.input_text
             st.subheader("Original Text")
             st.write(letter_text)
+
             st.subheader("Abstractive Summary")
             st.write(abstractive_summarization(letter_text))
+
             st.subheader("Extractive Summary")
             st.write(extractive_summarization(letter_text))
+
             st.subheader("Query-based Summaries")
             user_query = st.session_state.user_query if "user_query" in st.session_state else "What actions are being urged in the letter?"
             st.write(f"For query '{user_query}':", query_based_summarization(letter_text, query=user_query))
+
             st.subheader("Sentiment Analysis")
             sentiment_results = sentiment_analysis(letter_text)
             st.write(sentiment_results)
-            st.write(f"Sentiment Polarity (TextBlob): {TextBlob(letter_text).sentiment.polarity}")
-            st.subheader("Sentiment Gauge")
-            gauge_fig = plot_sentiment_gauge(TextBlob(letter_text).sentiment.polarity)
-            st.plotly_chart(gauge_fig)
-            if st.button("Back to Data Entry"):
-                st.experimental_rerun()
 
-    elif page == "Aggregated Analysis":
+            polarity = TextBlob(letter_text).sentiment.polarity
+            st.write(f"Sentiment Polarity (TextBlob): {polarity}")
+
+            st.subheader("Sentiment Gauge")
+            gauge_fig = plot_sentiment_gauge(polarity)
+            st.plotly_chart(gauge_fig)
+
+    # ------------------ Aggregated Analysis Tab ------------------
+    with tab3:
         st.title("Aggregated Analysis")
         uploaded_files = st.file_uploader("Upload multiple files for aggregated analysis",
                                           type=["txt", "csv", "pdf", "doc", "docx"],
@@ -411,10 +427,12 @@ def main():
             labels, vectorizer, kmeans = unsupervised_classification(texts_clean, num_clusters=2)
             cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
             df_agg["classification"] = [cluster_mapping[label] for label in labels]
+
             st.subheader("Classification Distribution")
             class_counts = df_agg["classification"].value_counts()
             st.write(class_counts)
             st.plotly_chart(plot_classification_distribution(class_counts))
+
             # Topic modeling per classification.
             for category in candidate_labels:
                 subset_texts = df_agg[df_agg["classification"] == category]["clean_text"].tolist()
@@ -424,6 +442,7 @@ def main():
                     for topic in topics:
                         dynamic_label = dynamic_topic_label(topic)
                         st.write(f"{dynamic_label} (Keywords: {topic})")
+
             # Aggregated sentiment.
             df_agg["sentiment_polarity"] = df_agg["text"].apply(lambda x: TextBlob(x).sentiment.polarity)
             st.subheader("Average Sentiment Polarity")
@@ -432,6 +451,8 @@ def main():
             st.plotly_chart(plot_sentiment_distribution(avg_sentiment))
             st.subheader("Sentiment Gauge (Aggregated)")
             st.plotly_chart(plot_sentiment_gauge(avg_sentiment))
+
+            # Simple CSV download example.
             report = df_agg.to_csv(index=False)
             st.download_button("Download Report (CSV)", report, file_name="aggregated_report.csv", mime="text/csv")
         else:
