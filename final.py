@@ -33,10 +33,10 @@ else:
     ssl._create_default_https_context = _create_unverified_https_context
 
 # ------------------ NLTK Downloads ------------------
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('vader_lexicon')
+# nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('wordnet')
+# nltk.download('vader_lexicon')
 
 
 # ------------------ Preprocessing Functions ------------------
@@ -108,7 +108,7 @@ def lemmatize_tokens(tokens):
 
 
 def comprehensive_text_preprocessing(text, use_lemmatization=True):
-    text = remove_email_headers_and_footers(text)
+    # text = remove_email_headers_and_footers(text)
     text = remove_emojis(text)
     text = expand_contractions(text)
     text = remove_urls(text)
