@@ -1,29 +1,44 @@
+# ------------------ Standard Libraries ------------------
 import os
 import io
 import ssl
 import re
-import emoji
-import contractions
+
+# ------------------ Data Handling and Numerical Processing ------------------
 import pandas as pd
+import numpy as np
+
+# ------------------ NLP Libraries (General) ------------------
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from nltk.sentiment import SentimentIntensityAnalyzer
+from textblob import TextBlob
+import emoji
+import contractions
+
+# ------------------ Machine Learning and Text Processing ------------------
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import LatentDirichletAllocation
-from nltk.sentiment import SentimentIntensityAnalyzer
-from textblob import TextBlob
-from transformers import pipeline as hf_pipeline
-import numpy as np
+
+# ------------------ Summarization and Topic Extraction ------------------
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lex_rank import LexRankSummarizer
-import plotly.graph_objects as go
-import streamlit as st
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline as hf_pipeline
-from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline as hf_pipeline
+from rake_nltk import Rake
+
+# ------------------ Transformers and Deep Learning Models ------------------
+# We'll load heavy models using caching below.
+from transformers import pipeline as hf_pipeline
 import sentencepiece
+
+# ------------------ Visualization ------------------
+import plotly.graph_objects as go
+
+# ------------------ Web App Framework ------------------
+import streamlit as st
 
 # ------------------ Fix OpenMP Warning ------------------
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
@@ -36,34 +51,170 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
-
 # ------------------ NLTK Downloads ------------------
-# Uncomment these lines if not already downloaded
-# nltk.download('punkt')
-# nltk.download('stopwords')
-# nltk.download('wordnet')
-# nltk.download('vader_lexicon')
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('vader_lexicon')
+
+# ------------------ Caching Model Loading ------------------
+@st.cache_resource
+def get_zero_shot_classifier():
+    return hf_pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+
+@st.cache_resource
+def get_abstractive_summarizer():
+    return hf_pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
+
+@st.cache_resource
+def get_sentiment_pipeline():
+    return hf_pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
 
 # ------------------ Helper: Sanitize Text for PDF ------------------
-def sanitize_text(text):
-    # Replace common Unicode punctuation with ASCII equivalents.
+def sanitize_text(text: str) -> str:
     replacements = {
         "\u2014": "-",  # em-dash to hyphen
         "\u2013": "-",  # en-dash to hyphen
-        "\u2018": "'",  # left single quote to apostrophe
-        "\u2019": "'",  # right single quote to apostrophe
-        "\u201c": '"',  # left double quote to regular quote
-        "\u201d": '"',  # right double quote to regular quote
-        "\u2026": "..."  # ellipsis to three dots
+        "\u2018": "'",  # left single quote
+        "\u2019": "'",  # right single quote
+        "\u201c": '"',  # left double quote
+        "\u201d": '"',  # right double quote
+        "\u2026": "..."  # ellipsis
     }
     for orig, repl in replacements.items():
         text = text.replace(orig, repl)
-    # Remove any remaining characters outside Latin-1.
     return ''.join(c if ord(c) < 256 else '?' for c in text)
 
+# ------------------ Expanded Candidate Labels for Topic Detection ------------------
+CANDIDATE_LABELS_TOPIC: tuple[str, ...] = (
+    "Waste Management / Public Cleanliness",
+    "Water Scarcity",
+    "Food Insecurity",
+    "Cybersecurity Threats",
+    "Delays in NHS Treatment",
+    "Underfunded Healthcare Services",
+    "Decline in Local Shops / High Street Businesses",
+    "High Cost of Living",
+    "Overcrowded Public Transport",
+    "Homelessness",
+    "Lack of Affordable Housing",
+    "Noise Pollution",
+    "Potholes / Road Maintenance",
+    "Traffic Congestion",
+    "Air Pollution",
+    "School Overcrowding",
+    "Crime Rates in Urban Areas",
+    "Limited Green Spaces",
+    "Aging Infrastructure",
+    "Digital Divide",
+    "Rising Energy Costs",
+    "Housing Quality Issues",
+    "Lack of Social Mobility",
+    "Climate Change Adaptation",
+    "Elderly Care Shortages",
+    "Rural Transport Accessibility",
+    "Mental Health Service Shortages",
+    "Drug and Alcohol Abuse",
+    "Gender Pay Gap",
+    "Age Discrimination in Employment",
+    "Child Poverty",
+    "Bureaucratic Delays in Government Services",
+    "Lack of Public Restrooms in Urban Areas",
+    "Unsafe Cycling Infrastructure",
+    "Tackling Modern Slavery",
+    "Gentrification and Displacement",
+    "Rise in Anti-Social Behaviour",
+    "Tackling Fake News and Misinformation",
+    "Integration of Immigrant Communities",
+    "Parking Problems",
+    "Littering in Public Spaces",
+    "Speeding Vehicles",
+    "Crumbling Pavements",
+    "Public Wi-Fi Gaps",
+    "Youth Services Cuts",
+    "Erosion of Coastal Areas",
+    "Flooding in Residential Areas",
+    "Loneliness and Social Isolation",
+    "Domestic Violence and Abuse",
+    "Racial Inequality and Discrimination",
+    "LGBTQ+ Rights and Inclusion",
+    "Disability Access",
+    "Childcare Costs and Availability",
+    "Veteran Support",
+    "Community Cohesion",
+    "Access to Arts and Culture",
+    "Biodiversity Loss",
+    "Urban Heat Islands",
+    "Single-Use Plastics",
+    "Education / Skills Development",
+    "Community Workshops",
+    "Renewable Energy Transition",
+    "Food Waste",
+    "Deforestation and Land Use",
+    "Light Pollution",
+    "Soil Degradation",
+    "Marine Pollution",
+    "Gig Economy Exploitation",
+    "Regional Economic Disparities",
+    "Skills Shortages",
+    "Zero-Hours Contracts",
+    "Pension Inequality",
+    "Rising Inflation",
+    "Small Business Struggles",
+    "Post-Brexit Trade Challenges",
+    "Automation and Job Loss",
+    "Unpaid Internships",
+    "Obesity Epidemic",
+    "Dental Care Access",
+    "Vaccine Hesitancy",
+    "Pandemic Preparedness",
+    "Nutritional Education",
+    "Physical Inactivity",
+    "Student Debt",
+    "Teacher Shortages",
+    "School Funding Cuts",
+    "Bullying in Schools",
+    "Access to Higher Education",
+    "Vocational Training Gaps",
+    "Digital Exclusion",
+    "Extracurricular Activity Cuts",
+    "Aging Public Buildings",
+    "Smart City Development",
+    "Electric Vehicle Infrastructure",
+    "5G Rollout Delays",
+    "Flood Defence Upgrades",
+    "Rail Network Overcrowding",
+    "AI Ethics and Regulation",
+    "Space Debris Management",
+    "Genetic Engineering Ethics",
+    "Climate Migration",
+    "Aging Population",
+    "Urbanisation Pressures",
+    "Data Privacy Concerns",
+    "Sustainable Fashion"
+)
+
+# ------------------ Topic Functions ------------------
+@st.cache_data
+def dynamic_topic_label(keywords: str) -> str:
+    classifier = get_zero_shot_classifier()
+    result = classifier(keywords, CANDIDATE_LABELS_TOPIC)
+    best_label = result["labels"][0]
+    return best_label
+
+@st.cache_data
+def compute_topic(text: str, top_n: int = 5) -> tuple[str, str]:
+    rake_extractor = Rake()  # RAKE uses default English stopwords.
+    rake_extractor.extract_keywords_from_text(text)
+    ranked_phrases = rake_extractor.get_ranked_phrases()
+    top_terms = ranked_phrases[:top_n] if len(ranked_phrases) >= top_n else ranked_phrases
+    keyword_str = ", ".join(top_terms)
+    topic_label = dynamic_topic_label(keyword_str)
+    return topic_label, keyword_str
 
 # ------------------ Preprocessing Functions ------------------
-def remove_email_headers_and_footers(text):
+@st.cache_data
+def remove_email_headers_and_footers(text: str) -> str:
     lines = text.split('\n')
     stripped_lines = [line.strip() for line in lines]
     if "" in stripped_lines:
@@ -71,7 +222,7 @@ def remove_email_headers_and_footers(text):
         content = "\n".join(lines[first_blank_index + 1:]).strip()
     else:
         content = text
-    signature_markers = ['sincerely,', 'regards,', 'best regards,', 'thanks,', 'thank you,']
+    signature_markers = ('sincerely,', 'regards,', 'best regards,', 'thanks,', 'thank you,')
     final_lines = []
     for line in content.split('\n'):
         if any(line.lower().startswith(marker) for marker in signature_markers):
@@ -79,58 +230,45 @@ def remove_email_headers_and_footers(text):
         final_lines.append(line)
     return "\n".join(final_lines).strip()
 
-
 def remove_emojis(text):
     return emoji.replace_emoji(text, replace="")
-
 
 def expand_contractions(text):
     return contractions.fix(text)
 
-
 def remove_urls(text):
     return re.sub(r'http\S+|www\S+', '', text)
-
 
 def remove_mentions_hashtags(text):
     text = re.sub(r'@\w+', '', text)
     text = re.sub(r'#\w+', '', text)
     return text
 
-
 def remove_punctuation(text):
     return re.sub(r'[^\w\s]', '', text)
-
 
 def remove_numbers(text):
     return re.sub(r'\d+', '', text)
 
-
 def normalize_repeated_chars(text):
     return re.sub(r'(.)\1{2,}', r'\1', text)
 
-
 def remove_extra_whitespace(text):
     return re.sub(r'\s+', ' ', text).strip()
-
 
 def tokenize_and_lower(text):
     tokens = word_tokenize(text)
     return [token.lower() for token in tokens]
 
-
 def remove_stopwords(tokens):
     stop_words = set(stopwords.words('english'))
     return [token for token in tokens if token not in stop_words]
-
 
 def lemmatize_tokens(tokens):
     lemmatizer = WordNetLemmatizer()
     return [lemmatizer.lemmatize(token) for token in tokens]
 
-
 def comprehensive_text_preprocessing(text, use_lemmatization=True):
-    # Optionally, include remove_email_headers_and_footers(text) if desired.
     text = remove_emojis(text)
     text = expand_contractions(text)
     text = remove_urls(text)
@@ -145,7 +283,6 @@ def comprehensive_text_preprocessing(text, use_lemmatization=True):
         tokens = lemmatize_tokens(tokens)
     return ' '.join(tokens)
 
-
 # ------------------ Unsupervised Classification Functions ------------------
 def unsupervised_classification(texts, num_clusters=2):
     vectorizer = TfidfVectorizer(stop_words='english', max_features=1000, ngram_range=(1, 2))
@@ -154,11 +291,8 @@ def unsupervised_classification(texts, num_clusters=2):
     kmeans.fit(X)
     return kmeans.labels_, vectorizer, kmeans
 
-
-# ------------------ Dynamic Topic Labeling ------------------
+# ------------------ Dynamic Topic Labeling for Clusters ------------------
 candidate_labels = ["Local Problem", "New Initiatives"]
-zero_shot_classifier = hf_pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-
 
 def dynamic_label_clusters(vectorizer, kmeans):
     cluster_labels = {}
@@ -167,11 +301,11 @@ def dynamic_label_clusters(vectorizer, kmeans):
     for i in range(kmeans.n_clusters):
         top_terms = [terms[ind] for ind in order_centroids[i, :10]]
         keyword_str = ", ".join(top_terms)
-        result = zero_shot_classifier(keyword_str, candidate_labels)
+        classifier = get_zero_shot_classifier()
+        result = classifier(keyword_str, candidate_labels)
         best_label = result["labels"][0]
         cluster_labels[i] = best_label
     return cluster_labels
-
 
 # ------------------ Topic Modeling ------------------
 def topic_modeling(texts, num_topics=1):
@@ -186,21 +320,12 @@ def topic_modeling(texts, num_topics=1):
         topics.append(", ".join(top_terms))
     return topics
 
-
-def dynamic_topic_label(keywords):
-    result = zero_shot_classifier(keywords, candidate_labels)
-    best_label = result["labels"][0]
-    return best_label
-
-
 # ------------------ Summarization Functions ------------------
-ABSTRACTIVE_SUMMARIZER = hf_pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
-
+abstractive_summarizer = get_abstractive_summarizer()
 
 def abstractive_summarization(text):
-    summary = ABSTRACTIVE_SUMMARIZER(text, max_length=50, min_length=25, do_sample=False)
+    summary = abstractive_summarizer(text, max_length=50, min_length=25, do_sample=False)
     return summary[0]['summary_text']
-
 
 def extractive_summarization(text, sentence_count=3):
     parser = PlaintextParser.from_string(text, Tokenizer("english"))
@@ -208,15 +333,13 @@ def extractive_summarization(text, sentence_count=3):
     summary = summarizer(parser.document, sentence_count)
     return " ".join([str(sentence) for sentence in summary])
 
-
 def query_based_summarization(text, query, threshold=0.1, top_n=2):
     sentences = sent_tokenize(text)
     if not sentences:
         return "No relevant information found for the query."
     action_indicators = ["urge", "request", "increase", "arrange", "immediate", "control", "measure", "action",
                          "implement", "improve", "take"]
-    is_action_query = any(
-        word in query.lower() for word in ["action", "request", "urge", "increase", "immediate", "control", "measure"])
+    is_action_query = any(word in query.lower() for word in ["action", "request", "urge", "increase", "immediate", "control", "measure"])
     if is_action_query:
         threshold = 0.05
     corpus = sentences + [query]
@@ -236,27 +359,17 @@ def query_based_summarization(text, query, threshold=0.1, top_n=2):
     summary = " ".join(sentences[i] for i in selected_indices)
     return summary
 
-
 # ------------------ Personalized Summary Wrapper ------------------
 def personalize_summary(summary, summary_type="general"):
-    if summary_type == "abstractive":
-        return f"The author indicates that {summary}"
-    elif summary_type == "extractive":
-        return f"Key points extracted from the letter: {summary}"
-    elif summary_type == "query":
-        return f"In response to your query, it appears that {summary}"
-    else:
-        return summary
-
+    return f" {summary}"
 
 # ------------------ Sentiment Analysis ------------------
-TRANSFORMER_SENTIMENT = hf_pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
-
+sentiment_pipeline = get_sentiment_pipeline()
 
 def sentiment_analysis(text):
     sia = SentimentIntensityAnalyzer()
     vader_scores = sia.polarity_scores(text)
-    transformer_result = TRANSFORMER_SENTIMENT(text)[0]
+    transformer_result = sentiment_pipeline(text)[0]
     if transformer_result["label"] == "NEGATIVE":
         sentiment_label = "Negative"
     elif transformer_result["label"] == "POSITIVE":
@@ -276,11 +389,8 @@ def sentiment_analysis(text):
         if "risk" in lower_text or "health" in lower_text:
             details.append("associated health risks")
         if details:
-            explanation += " Note based on sentiment; the author is highlighting concerns about " + ", ".join(
-                details) + ", which creates a sense of urgency and dissatisfaction."
-    return {"vader_scores": vader_scores, "transformer_result": transformer_result, "sentiment_label": sentiment_label,
-            "explanation": explanation}
-
+            explanation += " Note based on sentiment; the author is highlighting concerns about " + ", ".join(details) + ", which creates a sense of urgency and dissatisfaction."
+    return {"vader_scores": vader_scores, "transformer_result": transformer_result, "sentiment_label": sentiment_label, "explanation": explanation}
 
 # ------------------ Aggregated Analysis Plot Functions ------------------
 def plot_classification_distribution(class_counts):
@@ -288,12 +398,10 @@ def plot_classification_distribution(class_counts):
     fig.update_layout(title="Classification Distribution", xaxis_title="Category", yaxis_title="Count")
     return fig
 
-
 def plot_sentiment_distribution(avg_sentiment):
     fig = go.Figure([go.Bar(x=["Average Sentiment Polarity"], y=[avg_sentiment])])
     fig.update_layout(title="Average Sentiment Polarity", xaxis_title="Metric", yaxis_title="Polarity")
     return fig
-
 
 def plot_sentiment_gauge(polarity):
     fig = go.Figure(go.Indicator(
@@ -317,20 +425,16 @@ def plot_sentiment_gauge(polarity):
     ))
     return fig
 
-
 # ------------------ Report Generation Functions ------------------
 from fpdf import FPDF
 from docx import Document
 
-
 def generate_pdf_report(original_text, abstractive_summary, extractive_summary, query_summary, sentiment_results):
-    # Sanitize text before adding to PDF
     original_text = sanitize_text(original_text)
     abstractive_summary = sanitize_text(abstractive_summary)
     extractive_summary = sanitize_text(extractive_summary)
     query_summary = sanitize_text(query_summary)
     sentiment_results = sanitize_text(str(sentiment_results))
-
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
@@ -346,7 +450,6 @@ def generate_pdf_report(original_text, abstractive_summary, extractive_summary, 
     pdf.ln(3)
     pdf.multi_cell(0, 10, txt=f"Sentiment Analysis:\n{sentiment_results}\n")
     return pdf.output(dest='S').encode('latin1', errors='replace')
-
 
 def generate_docx_report(original_text, abstractive_summary, extractive_summary, query_summary, sentiment_results):
     doc = Document()
@@ -365,7 +468,6 @@ def generate_docx_report(original_text, abstractive_summary, extractive_summary,
     doc.save(buffer)
     return buffer.getvalue()
 
-
 # ------------------ Data Loading ------------------
 def load_data(file_path):
     try:
@@ -376,22 +478,16 @@ def load_data(file_path):
         st.write("Error loading data:", e)
         return None
 
-
 # ------------------ Main UI Pipeline Using Tabs ------------------
 def main():
     st.set_page_config(layout="wide")
-
-    # Sidebar with logo
     st.sidebar.image("src/img/Bolsover_District_Council_logo.svg", width=150)
-
-    # Create tabs for navigation
     tabs = st.tabs(["Data Entry", "Results", "Aggregated Analysis"])
 
     # ------------------ Data Entry Tab ------------------
     with tabs[0]:
         st.title("Citizen Letter Data Entry")
         data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"])
-        # Query input is moved to Results tab.
         if data_mode == "Paste Text":
             input_text = st.text_area("Paste your letter text here", height=200)
         else:
@@ -428,22 +524,14 @@ def main():
             with st.spinner("Processing..."):
                 st.session_state.input_text = input_text
                 st.session_state.data_mode = data_mode
+                st.session_state.data_submitted = True
             st.success("Data saved. Please switch to the 'Results' tab to see the analysis.")
-
-
-
-
-
 
     # ------------------ Paraphrasing Function ------------------
     def load_paraphrase_model():
-        # Load the tokenizer explicitly using T5Tokenizer
+        from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline as hf_pipeline
         tokenizer = T5Tokenizer.from_pretrained("Vamsi/T5_Paraphrase_Paws", use_fast=False)
-
-        # Load the model explicitly
         model = T5ForConditionalGeneration.from_pretrained("Vamsi/T5_Paraphrase_Paws")
-
-        # Create the pipeline manually
         paraphrase_pipeline = hf_pipeline(
             "text2text-generation",
             model=model,
@@ -452,37 +540,35 @@ def main():
         )
         return paraphrase_pipeline
 
-    PARAPHRASE_MODEL = load_paraphrase_model()
+    paraphrase_model = load_paraphrase_model()
 
     def paraphrase_text(text):
-        # Prepend the prompt if required (depends on your model)
-        # For T5, sometimes you need to add "paraphrase: " as a prefix.
         input_text = "paraphrase: " + text + " </s>"
-        paraphrase = PARAPHRASE_MODEL(input_text, do_sample=False)
+        paraphrase = paraphrase_model(input_text, do_sample=False)
         return paraphrase[0]['generated_text']
-
 
     # ------------------ Results Tab ------------------
     with tabs[1]:
         st.title("Individual Letter Analysis")
-        if "input_text" not in st.session_state or not st.session_state.input_text:
-            st.warning("No input data found. Please go to the 'Data Entry' tab and provide a letter.")
+        if "data_submitted" not in st.session_state or not st.session_state.data_submitted:
+            st.warning("No data submitted yet. Please go to the 'Data Entry' tab, provide a letter, and click Submit.")
         else:
             letter_text = st.session_state.input_text
             st.subheader("Original Text")
             st.write(letter_text)
 
-            # Compute classification for the individual letter using zero-shot on preprocessed text.
             letter_clean = comprehensive_text_preprocessing(letter_text)
-            classification_result = zero_shot_classifier(letter_clean, candidate_labels)
+            classifier = get_zero_shot_classifier()
+            classification_result = classifier(letter_clean, candidate_labels)
             letter_class = classification_result["labels"][0]
             st.subheader("Classification")
             st.write(f"This letter is classified as: **{letter_class}**")
 
-            # Query input now appears at the top of the Results tab.
-            user_query = st.text_input("Enter Query for Query-based Summarization",
-                                       "What actions are being urged in the letter?")
+            topic_label, top_keywords = compute_topic(letter_clean)
+            st.subheader("Topic")
+            st.write(f"Topic: **{topic_label}**")
 
+            user_query = st.text_input("Enter Query for Query-based Summarization", "What actions are being urged in the letter?")
             abstractive_res = abstractive_summarization(letter_text)
             extractive_res = extractive_summarization(letter_text)
             query_res = query_based_summarization(letter_text, query=user_query)
@@ -490,13 +576,10 @@ def main():
 
             st.subheader("Abstractive Summary")
             st.write(personalize_summary(abstractive_res, "abstractive"))
-
             st.subheader("Extractive Summary")
             st.write(personalize_summary(extractive_res, "extractive"))
-
             st.subheader(f"Query-based Summary ('{user_query}')")
             st.write(personalize_summary(refined_query_res, "query"))
-
             st.subheader("Sentiment Analysis")
             sentiment_results = sentiment_analysis(letter_text)
             st.write(sentiment_results)
@@ -506,23 +589,19 @@ def main():
             gauge_fig = plot_sentiment_gauge(polarity)
             st.plotly_chart(gauge_fig)
 
-            # Export dropdown for report download
             export_format = st.selectbox("Select Export Format", ["PDF", "DOCX", "TXT", "CSV"])
             if export_format == "PDF":
-                file_bytes = generate_pdf_report(letter_text, abstractive_res, extractive_res, query_res,
-                                                 sentiment_results)
-                st.download_button("Download Report", file_bytes, file_name="analysis_report.pdf",
-                                   mime="application/pdf")
+                file_bytes = generate_pdf_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
+                st.download_button("Download Report", file_bytes, file_name="analysis_report.pdf", mime="application/pdf")
             elif export_format == "DOCX":
-                file_bytes = generate_docx_report(letter_text, abstractive_res, extractive_res, query_res,
-                                                  sentiment_results)
-                st.download_button("Download Report", file_bytes, file_name="analysis_report.docx",
-                                   mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                file_bytes = generate_docx_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
+                st.download_button("Download Report", file_bytes, file_name="analysis_report.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
             elif export_format == "TXT":
                 txt_report = (
                     f"Analysis Report\n\nOriginal Text:\n{letter_text}\n\nAbstractive Summary:\n{abstractive_res}\n\n"
                     f"Extractive Summary:\n{extractive_res}\n\nQuery-based Summary:\n{query_res}\n\n"
-                    f"Sentiment Analysis:\n{sentiment_results}")
+                    f"Sentiment Analysis:\n{sentiment_results}"
+                )
                 st.download_button("Download Report", txt_report, file_name="analysis_report.txt", mime="text/plain")
             elif export_format == "CSV":
                 df_report = pd.DataFrame({
@@ -537,6 +616,7 @@ def main():
 
             if st.button("Back to Data Entry"):
                 st.session_state.input_text = ""
+                st.session_state.data_submitted = False
                 st.experimental_rerun()
 
     # ------------------ Aggregated Analysis Tab ------------------
@@ -608,15 +688,12 @@ def main():
             st.download_button("Download Report (CSV)", report_csv, file_name="aggregated_report.csv", mime="text/csv")
 
             pdf_bytes = generate_pdf_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-            st.download_button("Download Report (PDF)", pdf_bytes, file_name="aggregated_report.pdf",
-                               mime="application/pdf")
+            st.download_button("Download Report (PDF)", pdf_bytes, file_name="aggregated_report.pdf", mime="application/pdf")
 
             docx_bytes = generate_docx_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-            st.download_button("Download Report (DOCX)", docx_bytes, file_name="aggregated_report.docx",
-                               mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            st.download_button("Download Report (DOCX)", docx_bytes, file_name="aggregated_report.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
         else:
             st.warning("Please upload files for aggregated analysis.")
-
 
 if __name__ == '__main__':
     main()
