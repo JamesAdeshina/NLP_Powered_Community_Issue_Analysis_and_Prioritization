@@ -111,7 +111,7 @@ def main():
                 st.session_state.input_text = input_text
                 st.session_state.data_mode = data_mode
                 st.session_state.data_submitted = True
-            st.success("Data saved. Please switch to the 'Results' tab to see the analysis.")
+            st.success("Data saved. Please switch to the 'Results' tab to see the analysis...")
 
     # ------------------ Results Tab ------------------
     with tabs[1]:
