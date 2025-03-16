@@ -14,7 +14,6 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.sentiment import SentimentIntensityAnalyzer
-from textblob import TextBlob
 import emoji
 import contractions
 
@@ -40,9 +39,6 @@ import plotly.graph_objects as go
 # ------------------ Web App Framework ------------------
 import streamlit as st
 
-
-
-
 # ------------------ Fix OpenMP Warning ------------------
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
@@ -54,14 +50,11 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
-
 # ------------------ NLTK Downloads ------------------
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('vader_lexicon')
-
-
+# nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('wordnet')
+# nltk.download('vader_lexicon')
 
 # ------------------ Caching Model Loading ------------------
 @st.cache_resource
@@ -75,6 +68,27 @@ def get_abstractive_summarizer():
 @st.cache_resource
 def get_sentiment_pipeline():
     return hf_pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+
+# ------------------ Paraphrasing Function ------------------
+@st.cache_resource
+def load_paraphrase_model():
+    from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline as hf_pipeline
+    tokenizer = T5Tokenizer.from_pretrained("Vamsi/T5_Paraphrase_Paws", use_fast=False)
+    model = T5ForConditionalGeneration.from_pretrained("Vamsi/T5_Paraphrase_Paws")
+    paraphrase_pipeline = hf_pipeline(
+        "text2text-generation",
+        model=model,
+        tokenizer=tokenizer,
+        max_length=256
+    )
+    return paraphrase_pipeline
+
+paraphrase_model = load_paraphrase_model()
+
+def paraphrase_text(text):
+    input_text = "paraphrase: " + text + " </s>"
+    paraphrase = paraphrase_model(input_text, do_sample=False)
+    return paraphrase[0]['generated_text']
 
 # ------------------ Helper: Sanitize Text for PDF ------------------
 def sanitize_text(text: str) -> str:
@@ -372,31 +386,46 @@ def personalize_summary(summary, summary_type="general"):
 # ------------------ Sentiment Analysis ------------------
 sentiment_pipeline = get_sentiment_pipeline()
 
+
 def sentiment_analysis(text):
+    # 1. VADER Analysis
     sia = SentimentIntensityAnalyzer()
     vader_scores = sia.polarity_scores(text)
+    vader_compound = vader_scores["compound"]
+
+    # 2. Transformer Analysis
     transformer_result = sentiment_pipeline(text)[0]
-    if transformer_result["label"] == "NEGATIVE":
-        sentiment_label = "Negative"
-    elif transformer_result["label"] == "POSITIVE":
-        sentiment_label = "Positive"
+    transformer_label = transformer_result["label"]  # "NEGATIVE" or "POSITIVE"
+    transformer_score = transformer_result["score"]   # Confidence score
+
+
+
+    # 3. Override using domain-specific keywords.
+    # (These keywords are chosen based on the type of letters you see – adjust as needed.)
+    negative_keywords = ["complaint", "disrupt", "noise", "excessive", "urge", "investigate", "strict", "control", "disturb"]
+    if any(keyword in text.lower() for keyword in negative_keywords):
+        final_sentiment = "Negative"
     else:
-        sentiment_label = "Neutral"
-    if vader_scores["compound"] <= -0.3:
-        sentiment_label = "Negative"
-    explanation = f"The sentiment of the text is {sentiment_label}."
-    if sentiment_label == "Negative":
-        details = []
-        lower_text = text.lower()
-        if "litter" in lower_text or "trash" in lower_text:
-            details.append("an increase in littering")
-        if "overflowing" in lower_text or "bins" in lower_text:
-            details.append("overflowing trash bins")
-        if "risk" in lower_text or "health" in lower_text:
-            details.append("associated health risks")
-        if details:
-            explanation += " Note based on sentiment; the author is highlighting concerns about " + ", ".join(details) + ", which creates a sense of urgency and dissatisfaction."
-    return {"vader_scores": vader_scores, "transformer_result": transformer_result, "sentiment_label": sentiment_label, "explanation": explanation}
+        # Otherwise, choose based on transformer output
+        if transformer_label == "NEGATIVE":
+            final_sentiment = "Negative"
+        elif transformer_label == "POSITIVE":
+            final_sentiment = "Positive"
+        else:
+            final_sentiment = "Neutral"
+
+        # Additionally, if VADER is strongly negative, override
+        if vader_compound <= -0.3:
+            final_sentiment = "Negative"
+
+    explanation = f"The sentiment of the text is {final_sentiment}."
+    return {
+        "vader_scores": vader_scores,
+        "transformer_result": transformer_result,
+        "sentiment_label": final_sentiment,
+        "explanation": explanation
+    }
+
 
 # ------------------ Aggregated Analysis Plot Functions ------------------
 def plot_classification_distribution(class_counts):
@@ -410,6 +439,7 @@ def plot_sentiment_distribution(avg_sentiment):
     return fig
 
 def plot_sentiment_gauge(polarity):
+    # Create the gauge
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=polarity,
@@ -429,6 +459,35 @@ def plot_sentiment_gauge(polarity):
             }
         }
     ))
+
+    # --- Add Annotations to Simulate a Legend ---
+    # We'll place them near the bottom of the gauge area.
+    fig.update_layout(
+        annotations=[
+            # Negative label
+            dict(
+                x=0.15, y=0.1,  # Adjust these x,y for best positioning
+                text="<b>Negative</b>",
+                showarrow=False,
+                font=dict(color="red", size=12)
+            ),
+            # Neutral label
+            dict(
+                x=0.50, y=0.1,
+                text="<b>Neutral</b>",
+                showarrow=False,
+                font=dict(color="yellow", size=12)
+            ),
+            # Positive label
+            dict(
+                x=0.85, y=0.1,
+                text="<b>Positive</b>",
+                showarrow=False,
+                font=dict(color="green", size=12)
+            )
+        ]
+    )
+
     return fig
 
 # ------------------ Report Generation Functions ------------------
@@ -484,222 +543,273 @@ def load_data(file_path):
         st.write("Error loading data:", e)
         return None
 
-# ------------------ Main UI Pipeline Using Tabs ------------------
+# ------------------ Main UI Pipeline Using Pages ------------------
 def main():
     st.set_page_config(layout="wide")
     st.sidebar.image("src/img/Bolsover_District_Council_logo.svg", width=150)
-    tabs = st.tabs(["Data Entry", "Results", "Aggregated Analysis"])
 
-    # ------------------ Data Entry Tab ------------------
-    with tabs[0]:
-        st.title("Citizen Letter Data Entry")
-        data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"])
-        if data_mode == "Paste Text":
-            input_text = st.text_area("Paste your letter text here", height=200)
-        else:
-            uploaded_file = st.file_uploader("Upload a file (txt, csv, pdf, doc, docx)",
-                                             type=["txt", "csv", "pdf", "doc", "docx"],
-                                             accept_multiple_files=False)
-            input_text = ""
-            if uploaded_file is not None:
-                if uploaded_file.type == "text/plain":
-                    input_text = uploaded_file.read().decode("utf-8")
-                elif uploaded_file.type == "text/csv":
-                    df_file = pd.read_csv(uploaded_file)
-                    input_text = " ".join(df_file['text'].astype(str).tolist())
-                elif uploaded_file.type == "application/pdf":
-                    try:
-                        from PyPDF2 import PdfReader
-                        reader = PdfReader(uploaded_file)
-                        input_text = ""
-                        for page in reader.pages:
-                            input_text += page.extract_text()
-                    except Exception as e:
-                        st.write("Error processing PDF:", e)
-                elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                            "application/msword"]:
-                    try:
-                        import docx2txt
-                        input_text = docx2txt.process(uploaded_file)
-                    except Exception as e:
-                        st.write("Error processing DOC/DOCX:", e)
-                else:
-                    input_text = uploaded_file.read().decode("utf-8")
+    if "page" not in st.session_state:
+        st.session_state.page = "data_entry"
 
-        if st.button("Submit"):
-            with st.spinner("Processing..."):
-                st.session_state.input_text = input_text
-                st.session_state.data_mode = data_mode
-                st.session_state.data_submitted = True
-            st.success("Data saved. Please switch to the 'Results' tab to see the analysis.")
+    if st.session_state.page == "data_entry":
+        data_entry_page()
+    elif st.session_state.page == "results":
+        results_page()
+    elif st.session_state.page == "aggregated_analysis":
+        aggregated_analysis_page()
 
-    # ------------------ Paraphrasing Function ------------------
-    def load_paraphrase_model():
-        from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline as hf_pipeline
-        tokenizer = T5Tokenizer.from_pretrained("Vamsi/T5_Paraphrase_Paws", use_fast=False)
-        model = T5ForConditionalGeneration.from_pretrained("Vamsi/T5_Paraphrase_Paws")
-        paraphrase_pipeline = hf_pipeline(
-            "text2text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            max_length=256
+def data_entry_page():
+    st.title("Letter Submission (Data Entry)")
+    data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"])
+    if data_mode == "Paste Text":
+        input_text = st.text_area("Paste your letter text here", height=200)
+    else:
+        uploaded_file = st.file_uploader("Upload a file (txt, csv, pdf, doc, docx)",
+                                         type=["txt", "csv", "pdf", "doc", "docx"],
+                                         accept_multiple_files=False)
+        input_text = ""
+        if uploaded_file is not None:
+            if uploaded_file.type == "text/plain":
+                input_text = uploaded_file.read().decode("utf-8")
+            elif uploaded_file.type == "text/csv":
+                df_file = pd.read_csv(uploaded_file)
+                input_text = " ".join(df_file['text'].astype(str).tolist())
+            elif uploaded_file.type == "application/pdf":
+                try:
+                    from PyPDF2 import PdfReader
+                    reader = PdfReader(uploaded_file)
+                    input_text = ""
+                    for page in reader.pages:
+                        input_text += page.extract_text()
+                except Exception as e:
+                    st.write("Error processing PDF:", e)
+            elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                        "application/msword"]:
+                try:
+                    import docx2txt
+                    input_text = docx2txt.process(uploaded_file)
+                except Exception as e:
+                    st.write("Error processing DOC/DOCX:", e)
+            else:
+                input_text = uploaded_file.read().decode("utf-8")
+
+    if st.button("Submit"):
+        with st.spinner("Processing..."):
+            st.session_state.input_text = input_text
+            st.session_state.data_mode = data_mode
+            st.session_state.data_submitted = True
+            st.session_state.page = "results"
+        st.rerun()
+
+
+def results_page():
+    st.title("Individual Letter Analysis")
+    if "data_submitted" not in st.session_state or not st.session_state.data_submitted:
+        st.warning("No data submitted yet. Please go to the 'Data Entry' page, provide a letter, and click Submit.")
+    else:
+        letter_text = st.session_state.input_text
+        st.subheader("Original Text")
+        st.write(letter_text)
+
+        # Preprocessing + classification
+        letter_clean = comprehensive_text_preprocessing(letter_text)
+        classifier = get_zero_shot_classifier()
+        classification_result = classifier(letter_clean, candidate_labels)
+        letter_class = classification_result["labels"][0]
+        st.subheader("Classification")
+        st.write(f"This letter is classified as: **{letter_class}**")
+
+        # Compute topic
+        topic_label, top_keywords = compute_topic(letter_clean)
+        st.subheader("Topic")
+        st.write(f"Topic: **{topic_label}**")
+
+        # Abstractive & extractive summaries
+        abstractive_res = abstractive_summarization(letter_text)
+        extractive_res = extractive_summarization(letter_text)
+
+        # Card-style layout for summaries
+        st.markdown(
+            """
+            <style>
+            .card {
+                box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+                transition: 0.3s;
+                border-radius: 5px;
+                padding: 16px;
+                margin: 10px 0;
+                background-color: var(--background-color);
+                color: var(--text-color);
+            }
+            .card:hover {
+                box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            }
+            /* Light mode */
+            [data-theme="light"] .card {
+                --background-color: #F0F2F6;
+                --text-color: #000000;
+            }
+            /* Dark mode */
+            [data-theme="dark"] .card {
+                --background-color: #262730;
+                --text-color: #FFFFFF;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
         )
-        return paraphrase_pipeline
 
-    paraphrase_model = load_paraphrase_model()
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("💡 Key Takeaways")
+            st.markdown(f"""
+                <div class="card">
+                    <p>{abstractive_res}</p>
+                </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.subheader("🔍 Highlighted Sentences")
+            st.markdown(f"""
+                <div class="card">
+                    <p>{extractive_res}</p>
+                </div>
+            """, unsafe_allow_html=True)
 
-    def paraphrase_text(text):
-        input_text = "paraphrase: " + text + " </s>"
-        paraphrase = paraphrase_model(input_text, do_sample=False)
-        return paraphrase[0]['generated_text']
+        # Inquisitive Summary + user query
+        st.subheader("❓ Inquisitive Summary")
+        user_query = st.text_input("Query", "What actions are being urged in the letter?")
+        query_res = query_based_summarization(letter_text, query=user_query)
+        refined_query_res = paraphrase_text(query_res)
+        st.write(personalize_summary(refined_query_res, "query"))
 
-    # ------------------ Results Tab ------------------
-    with tabs[1]:
-        st.title("Individual Letter Analysis")
-        if "data_submitted" not in st.session_state or not st.session_state.data_submitted:
-            st.warning("No data submitted yet. Please go to the 'Data Entry' tab, provide a letter, and click Submit.")
-        else:
-            letter_text = st.session_state.input_text
-            st.subheader("Original Text")
-            st.write(letter_text)
+        # Resident Mood Overview and debug info
+        st.subheader("🗣️ Resident Mood Overview")
+        sentiment_results = sentiment_analysis(letter_text)
+        transformer_score = sentiment_results["transformer_result"]["score"]
+        vader_compound = sentiment_results["vader_scores"]["compound"]
 
-            letter_clean = comprehensive_text_preprocessing(letter_text)
-            classifier = get_zero_shot_classifier()
-            classification_result = classifier(letter_clean, candidate_labels)
-            letter_class = classification_result["labels"][0]
-            st.subheader("Classification")
-            st.write(f"This letter is classified as: **{letter_class}**")
 
-            topic_label, top_keywords = compute_topic(letter_clean)
-            st.subheader("Topic")
-            st.write(f"Topic: **{topic_label}**")
+        # Extract final sentiment label and explanation
+        sentiment_label = sentiment_results["sentiment_label"]
+        explanation = sentiment_results["explanation"]
 
-            user_query = st.text_input("Enter Query for Query-based Summarization", "What actions are being urged in the letter?")
-            abstractive_res = abstractive_summarization(letter_text)
-            extractive_res = extractive_summarization(letter_text)
-            query_res = query_based_summarization(letter_text, query=user_query)
-            refined_query_res = paraphrase_text(query_res)
-
-            st.subheader("Abstractive Summary")
-            st.write(personalize_summary(abstractive_res, "abstractive"))
-            st.subheader("Extractive Summary")
-            st.write(personalize_summary(extractive_res, "extractive"))
-            st.subheader(f"Query-based Summary ('{user_query}')")
-            st.write(personalize_summary(refined_query_res, "query"))
-            st.subheader("Sentiment Analysis")
-            sentiment_results = sentiment_analysis(letter_text)
-            st.write(sentiment_results)
-            polarity = TextBlob(letter_text).sentiment.polarity
-            st.write(f"Sentiment Polarity (TextBlob): {polarity}")
-            st.subheader("Sentiment Gauge")
-            gauge_fig = plot_sentiment_gauge(polarity)
+        # Combine mood overview and gauge in a two-column layout
+        col_mood, col_gauge = st.columns(2)
+        with col_mood:
+            st.write(f"**Mood:** {sentiment_label}")
+            st.write(explanation)
+        with col_gauge:
+            gauge_fig = plot_sentiment_gauge(vader_compound)
             st.plotly_chart(gauge_fig)
 
-            export_format = st.selectbox("Select Export Format", ["PDF", "DOCX", "TXT", "CSV"])
-            if export_format == "PDF":
-                file_bytes = generate_pdf_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
-                st.download_button("Download Report", file_bytes, file_name="analysis_report.pdf", mime="application/pdf")
-            elif export_format == "DOCX":
-                file_bytes = generate_docx_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
-                st.download_button("Download Report", file_bytes, file_name="analysis_report.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-            elif export_format == "TXT":
-                txt_report = (
-                    f"Analysis Report\n\nOriginal Text:\n{letter_text}\n\nAbstractive Summary:\n{abstractive_res}\n\n"
-                    f"Extractive Summary:\n{extractive_res}\n\nQuery-based Summary:\n{query_res}\n\n"
-                    f"Sentiment Analysis:\n{sentiment_results}"
-                )
-                st.download_button("Download Report", txt_report, file_name="analysis_report.txt", mime="text/plain")
-            elif export_format == "CSV":
-                df_report = pd.DataFrame({
-                    "Original Text": [letter_text],
-                    "Abstractive Summary": [abstractive_res],
-                    "Extractive Summary": [extractive_res],
-                    "Query-based Summary": [query_res],
-                    "Sentiment Analysis": [str(sentiment_results)]
-                })
-                csv_report = df_report.to_csv(index=False)
-                st.download_button("Download Report", csv_report, file_name="analysis_report.csv", mime="text/csv")
+        # Export format
+        export_format = st.selectbox("Select Export Format", ["PDF", "DOCX", "TXT", "CSV"])
+        if export_format == "PDF":
+            file_bytes = generate_pdf_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
+            st.download_button("Download Report", file_bytes, file_name="analysis_report.pdf", mime="application/pdf")
+        elif export_format == "DOCX":
+            file_bytes = generate_docx_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
+            st.download_button("Download Report", file_bytes, file_name="analysis_report.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        elif export_format == "TXT":
+            txt_report = (
+                f"Analysis Report\n\nOriginal Text:\n{letter_text}\n\nAbstractive Summary:\n{abstractive_res}\n\n"
+                f"Extractive Summary:\n{extractive_res}\n\nQuery-based Summary:\n{query_res}\n\n"
+                f"Sentiment Analysis:\n{sentiment_results}"
+            )
+            st.download_button("Download Report", txt_report, file_name="analysis_report.txt", mime="text/plain")
+        elif export_format == "CSV":
+            df_report = pd.DataFrame({
+                "Original Text": [letter_text],
+                "Abstractive Summary": [abstractive_res],
+                "Extractive Summary": [extractive_res],
+                "Query-based Summary": [query_res],
+                "Sentiment Analysis": [str(sentiment_results)]
+            })
+            csv_report = df_report.to_csv(index=False)
+            st.download_button("Download Report", csv_report, file_name="analysis_report.csv", mime="text/csv")
 
-            if st.button("Back to Data Entry"):
-                st.session_state.input_text = ""
-                st.session_state.data_submitted = False
-                st.experimental_rerun()
+        if st.button("Back to Data Entry"):
+            st.session_state.input_text = ""
+            st.session_state.data_submitted = False
+            st.session_state.page = "data_entry"
+            st.rerun()
 
-    # ------------------ Aggregated Analysis Tab ------------------
-    with tabs[2]:
-        st.title("Aggregated Analysis")
-        uploaded_files = st.file_uploader("Upload multiple files for aggregated analysis",
-                                          type=["txt", "csv", "pdf", "doc", "docx"],
-                                          accept_multiple_files=True)
-        if uploaded_files:
-            all_texts = []
-            for uploaded_file in uploaded_files:
-                if uploaded_file.type == "text/plain":
-                    text = uploaded_file.read().decode("utf-8")
-                elif uploaded_file.type == "text/csv":
-                    df_file = pd.read_csv(uploaded_file)
-                    text = " ".join(df_file['text'].astype(str).tolist())
-                elif uploaded_file.type == "application/pdf":
-                    try:
-                        from PyPDF2 import PdfReader
-                        reader = PdfReader(uploaded_file)
-                        text = ""
-                        for page in reader.pages:
-                            text += page.extract_text()
-                    except Exception as e:
-                        st.write("Error processing PDF:", e)
-                        text = ""
-                elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                            "application/msword"]:
-                    try:
-                        import docx2txt
-                        text = docx2txt.process(uploaded_file)
-                    except Exception as e:
-                        st.write("Error processing DOC/DOCX:", e)
-                        text = ""
-                else:
-                    text = uploaded_file.read().decode("utf-8")
-                all_texts.append(text)
 
-            df_agg = pd.DataFrame({"text": all_texts})
-            df_agg["clean_text"] = df_agg["text"].apply(comprehensive_text_preprocessing)
-            texts_clean = df_agg["clean_text"].tolist()
-            labels, vectorizer, kmeans = unsupervised_classification(texts_clean, num_clusters=2)
-            cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
-            df_agg["classification"] = [cluster_mapping[label] for label in labels]
 
-            st.subheader("Classification Distribution")
-            class_counts = df_agg["classification"].value_counts()
-            st.write(class_counts)
-            st.plotly_chart(plot_classification_distribution(class_counts))
+def aggregated_analysis_page():
+    st.title("Aggregated Analysis")
+    uploaded_files = st.file_uploader("Upload multiple files for aggregated analysis",
+                                      type=["txt", "csv", "pdf", "doc", "docx"],
+                                      accept_multiple_files=True)
+    if uploaded_files:
+        all_texts = []
+        for uploaded_file in uploaded_files:
+            if uploaded_file.type == "text/plain":
+                text = uploaded_file.read().decode("utf-8")
+            elif uploaded_file.type == "text/csv":
+                df_file = pd.read_csv(uploaded_file)
+                text = " ".join(df_file['text'].astype(str).tolist())
+            elif uploaded_file.type == "application/pdf":
+                try:
+                    from PyPDF2 import PdfReader
+                    reader = PdfReader(uploaded_file)
+                    text = ""
+                    for page in reader.pages:
+                        text += page.extract_text()
+                except Exception as e:
+                    st.write("Error processing PDF:", e)
+                    text = ""
+            elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                        "application/msword"]:
+                try:
+                    import docx2txt
+                    text = docx2txt.process(uploaded_file)
+                except Exception as e:
+                    st.write("Error processing DOC/DOCX:", e)
+                    text = ""
+            else:
+                text = uploaded_file.read().decode("utf-8")
+            all_texts.append(text)
 
-            for category in candidate_labels:
-                subset_texts = df_agg[df_agg["classification"] == category]["clean_text"].tolist()
-                if subset_texts:
-                    topics = topic_modeling(subset_texts, num_topics=5)
-                    st.subheader(f"Extracted Topics for {category}")
-                    for topic in topics:
-                        dynamic_label = dynamic_topic_label(topic)
-                        st.write(f"{dynamic_label} (Keywords: {topic})")
+        df_agg = pd.DataFrame({"text": all_texts})
+        df_agg["clean_text"] = df_agg["text"].apply(comprehensive_text_preprocessing)
+        texts_clean = df_agg["clean_text"].tolist()
+        labels, vectorizer, kmeans = unsupervised_classification(texts_clean, num_clusters=2)
+        cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
+        df_agg["classification"] = [cluster_mapping[label] for label in labels]
 
-            df_agg["sentiment_polarity"] = df_agg["text"].apply(lambda x: TextBlob(x).sentiment.polarity)
-            st.subheader("Average Sentiment Polarity")
-            avg_sentiment = df_agg["sentiment_polarity"].mean()
-            st.write(avg_sentiment)
-            st.plotly_chart(plot_sentiment_distribution(avg_sentiment))
-            st.subheader("Sentiment Gauge (Aggregated)")
-            st.plotly_chart(plot_sentiment_gauge(avg_sentiment))
+        st.subheader("Classification Distribution")
+        class_counts = df_agg["classification"].value_counts()
+        st.write(class_counts)
+        st.plotly_chart(plot_classification_distribution(class_counts))
 
-            report_csv = df_agg.to_csv(index=False)
-            st.download_button("Download Report (CSV)", report_csv, file_name="aggregated_report.csv", mime="text/csv")
+        for category in candidate_labels:
+            subset_texts = df_agg[df_agg["classification"] == category]["clean_text"].tolist()
+            if subset_texts:
+                topics = topic_modeling(subset_texts, num_topics=5)
+                st.subheader(f"Extracted Topics for {category}")
+                for topic in topics:
+                    dynamic_label = dynamic_topic_label(topic)
+                    st.write(f"{dynamic_label} (Keywords: {topic})")
 
-            pdf_bytes = generate_pdf_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-            st.download_button("Download Report (PDF)", pdf_bytes, file_name="aggregated_report.pdf", mime="application/pdf")
+        df_agg["sentiment_polarity"] = df_agg["text"].apply(lambda x: sentiment_analysis(x)["vader_scores"]["compound"])
+        st.subheader("Average Sentiment Polarity")
+        avg_sentiment = df_agg["sentiment_polarity"].mean()
+        st.write(avg_sentiment)
+        st.plotly_chart(plot_sentiment_distribution(avg_sentiment))
+        st.subheader("Sentiment Gauge (Aggregated)")
+        st.plotly_chart(plot_sentiment_gauge(avg_sentiment))
 
-            docx_bytes = generate_docx_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-            st.download_button("Download Report (DOCX)", docx_bytes, file_name="aggregated_report.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-        else:
-            st.warning("Please upload files for aggregated analysis.")
+        report_csv = df_agg.to_csv(index=False)
+        st.download_button("Download Report (CSV)", report_csv, file_name="aggregated_report.csv", mime="text/csv")
+
+        pdf_bytes = generate_pdf_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
+        st.download_button("Download Report (PDF)", pdf_bytes, file_name="aggregated_report.pdf", mime="application/pdf")
+
+        docx_bytes = generate_docx_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
+        st.download_button("Download Report (DOCX)", docx_bytes, file_name="aggregated_report.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    else:
+        st.warning("Please upload files for aggregated analysis.")
 
 if __name__ == '__main__':
     main()
