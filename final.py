@@ -4,6 +4,10 @@ import io
 import ssl
 import re
 
+# ------------------ # Add to file reading imports ------------------
+import PyPDF2
+from docx import Document
+
 # ------------------ Data Handling and Numerical Processing ------------------
 import pandas as pd
 import numpy as np
@@ -563,35 +567,416 @@ def load_data(file_path):
 
 
 # ------------------ Main UI Pipeline Using Pages ------------------
+
+def get_file_icon_path(num_files, file_extensions):
+    """
+    Return a path to the correct SVG icon
+    given the number of files and the extension set.
+    """
+    if num_files == 0:
+        return "src/img/Empty.svg"
+
+    if num_files == 1:
+        # Check if user pasted
+        if "paste" in file_extensions:
+            return "src/img/Single_default.svg"  # <--- For a single pasted letter
+        elif "pdf" in file_extensions and len(file_extensions) == 1:
+            return "src/img/Single_Pdf.svg"
+        elif "doc" in file_extensions and len(file_extensions) == 1:
+            return "src/img/Single_Doc.svg"
+        else:
+            return "src/img/Single_default.svg"
+
+    # If multiple files
+    # If all PDFs
+    if file_extensions == {"pdf"}:
+        return "src/img/Multiple_Pdf.svg"
+    # If all docs
+    elif file_extensions == {"doc"}:
+        return "src/img/Multiple_Doc.svg"
+    # If mixture
+    elif "pdf" in file_extensions or "doc" in file_extensions:
+        return "src/img/Multiple_Both.svg"
+    else:
+        return "src/img/Multiple_default.svg"
+
+def pick_sidebar_icon(num_files, file_types):
+    if num_files == 0:
+        return "src/img/Multiple_Default.svg"
+    if num_files == 1:
+        ft = next(iter(file_types))
+        if ft == "application/pdf":
+            return "src/img/Single_Pdf.svg"
+        elif ft in ("application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
+            return "src/img/Single_Doc.svg"
+        else:
+            return "src/img/Single_Default.svg"
+    if file_types == {"application/pdf"}:
+        return "src/img/Multiple_Pdf.svg"
+    elif file_types.issubset({"application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}):
+        return "src/img/Multiple_Doc.svg"
+    elif {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"} & file_types:
+        return "src/img/Multiple_Both.svg"
+    else:
+        return "src/img/Multiple_Default.svg"
+
+
+def data_entry_page():
+    st.title("Letter Submission (Data Entry)")
+    data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"])
+
+    input_text = ""
+    uploaded_files = []
+
+    if data_mode == "Paste Text":
+        input_text = st.text_area("Paste your letter text here", height=200)
+    else:
+        uploaded_files = st.file_uploader(
+            "Upload files (txt, pdf, doc, docx)",
+            type=["txt", "pdf", "doc", "docx"],
+            accept_multiple_files=True
+        )
+
+    if st.button("Submit"):
+        with st.spinner("Processing..."):
+            if data_mode == "Paste Text":
+                if not input_text.strip():
+                    st.warning("Please paste some text before submitting.")
+                    return
+
+                st.session_state.input_text = input_text
+                st.session_state.data_submitted = True
+                st.session_state.data_mode = data_mode
+                st.session_state.uploaded_file_info = {
+                    "num_files": 1,
+                    "file_extensions": {"paste"}
+                }
+                st.session_state.page = "results"
+                st.rerun()
+
+            elif data_mode == "Upload File":
+                if not uploaded_files:
+                    st.warning("Please upload at least one file.")
+                    return
+
+                file_types = []
+                extracted_texts = []
+                combined_text = ""
+
+                for file in uploaded_files:
+                    file_type = file.type
+                    file_types.append(file_type)
+                    text = ""
+
+                    try:
+                        if file_type == "application/pdf":
+                            pdf_reader = PyPDF2.PdfReader(file)
+                            text = "\n".join([
+                                page.extract_text()
+                                for page in pdf_reader.pages
+                                if page.extract_text()
+                            ])
+
+                        elif file_type in ["application/msword",
+                                           "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                            doc = Document(file)
+                            text = "\n".join([
+                                para.text
+                                for para in doc.paragraphs
+                                if para.text.strip()
+                            ])
+
+                        elif file_type == "text/plain":
+                            text = file.getvalue().decode("utf-8")
+
+                    except Exception as e:
+                        st.error(f"Error reading {file.name}: {str(e)}")
+                        continue
+
+                    if text.strip():
+                        extracted_texts.append(text.strip())
+                        combined_text += f"\n\n{text.strip()}"
+
+                if not extracted_texts:
+                    st.error("Could not extract any text from uploaded files")
+                    return
+
+                # Update session state
+                st.session_state.uploaded_files_texts = extracted_texts
+                st.session_state.input_text = combined_text.strip()
+                st.session_state.data_submitted = True
+                st.session_state.data_mode = data_mode
+
+                # Handle file type icons
+                ext_set = set()
+                for ft in file_types:
+                    if "pdf" in ft.lower():
+                        ext_set.add("pdf")
+                    elif "msword" in ft.lower() or "wordprocessingml.document" in ft.lower():
+                        ext_set.add("doc")
+                    else:
+                        ext_set.add("default")
+
+                st.session_state.uploaded_file_info = {
+                    "num_files": len(uploaded_files),
+                    "file_extensions": ext_set
+                }
+
+                # Route to correct page
+                if len(uploaded_files) > 1:
+                    st.session_state.page = "aggregated_analysis"
+                else:
+                    st.session_state.page = "results"
+
+                st.rerun()
+
+def results_page():
+    st.title("Individual Letter Analysis")
+    if "data_submitted" not in st.session_state or not st.session_state.data_submitted:
+        st.warning("No data submitted yet. Please go to the 'Data Entry' page, provide a letter, and click Submit.")
+        return
+
+    letter_text = st.session_state.get("input_text", "")
+
+    # Sidebar: Show a dynamic icon based on the upload type.
+    with st.sidebar:
+        # If user pasted text, always show the single default icon.
+        if st.session_state.get("data_mode") == "Paste Text":
+            icon_path = "src/img/Single_Default.svg"
+        else:
+            # For file uploads, use the uploaded_files_types set
+            file_types = st.session_state.get("uploaded_files_types", set())
+            if len(file_types) == 1:
+                ft = next(iter(file_types))
+                if ft == "application/pdf":
+                    icon_path = "src/img/Single_Pdf.svg"
+                elif ft in ["application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                    icon_path = "src/img/Single_Doc.svg"
+                else:
+                    icon_path = "src/img/Single_Default.svg"
+            else:
+                # Multiple files uploaded
+                if file_types == {"application/pdf"}:
+                    icon_path = "src/img/Multiple_Pdf.svg"
+                elif file_types.issubset({"application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}):
+                    icon_path = "src/img/Multiple_Doc.svg"
+                elif {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"} & file_types:
+                    icon_path = "src/img/Multiple_Both.svg"
+                else:
+                    icon_path = "src/img/Multiple_Default.svg"
+        st.image(icon_path, width=150)
+        with st.expander("Original Text", expanded=False):
+            st.write(letter_text)
+
+    # Continue processing for individual analysis
+    letter_clean = comprehensive_text_preprocessing(letter_text)
+    classifier = get_zero_shot_classifier()
+    if letter_clean.strip():
+        classification_result = classifier(letter_clean, candidate_labels)
+        letter_class = classification_result["labels"][0]
+    else:
+        letter_class = "Unclassified (insufficient text)"
+        st.warning("Could not classify - extracted text appears empty")
+    st.subheader("Classification")
+    st.write(f"This letter is classified as: **{letter_class}**")
+
+    topic_label, top_keywords = compute_topic(letter_clean)
+    st.subheader("Topic")
+    st.write(f"Topic: **{topic_label}**")
+
+    abstractive_res = abstractive_summarization(letter_text)
+    extractive_res = extractive_summarization(letter_text)
+
+    st.markdown(
+        """
+        <style>
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+            border-radius: 5px;
+            padding: 16px;
+            margin: 10px 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+        [data-theme="light"] .card {
+            --background-color: #F0F2F6;
+            --text-color: #000000;
+        }
+        [data-theme="dark"] .card {
+            --background-color: #262730;
+            --text-color: #FFFFFF;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("💡 Key Takeaways")
+        st.markdown(f"""
+            <div class="card">
+                <p>{abstractive_res}</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.subheader("🔍 Highlighted Sentences")
+        st.markdown(f"""
+            <div class="card">
+                <p>{extractive_res}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.subheader("❓ Inquisitive Summary")
+    user_query = st.text_input("Query", "What actions are being urged in the letter?")
+    query_res = query_based_summarization(letter_text, query=user_query)
+    refined_query_res = paraphrase_text(query_res)
+    st.write(personalize_summary(refined_query_res, "query"))
+
+    st.subheader("🗣️ Resident Mood Overview")
+    sentiment_results = sentiment_analysis(letter_text)
+    vader_compound = sentiment_results["vader_scores"]["compound"]
+    sentiment_label = sentiment_results["sentiment_label"]
+    explanation = sentiment_results["explanation"]
+
+    col_mood, col_gauge = st.columns(2)
+    with col_mood:
+        st.write(f"**Mood:** {sentiment_label}")
+        st.write(explanation)
+    with col_gauge:
+        gauge_fig = plot_sentiment_gauge(vader_compound)
+        st.plotly_chart(gauge_fig)
+
+    export_format = st.selectbox("Select Export Format", ["PDF", "DOCX", "TXT", "CSV"])
+    if export_format == "PDF":
+        file_bytes = generate_pdf_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
+        st.download_button("Download Report", file_bytes, file_name="analysis_report.pdf", mime="application/pdf")
+    elif export_format == "DOCX":
+        file_bytes = generate_docx_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
+        st.download_button("Download Report", file_bytes, file_name="analysis_report.docx",
+                           mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    elif export_format == "TXT":
+        txt_report = (
+            f"Analysis Report\n\nOriginal Text:\n{letter_text}\n\nAbstractive Summary:\n{abstractive_res}\n\n"
+            f"Extractive Summary:\n{extractive_res}\n\nQuery-based Summary:\n{query_res}\n\n"
+            f"Sentiment Analysis:\n{sentiment_results}"
+        )
+        st.download_button("Download Report", txt_report, file_name="analysis_report.txt", mime="text/plain")
+    elif export_format == "CSV":
+        df_report = pd.DataFrame({
+            "Original Text": [letter_text],
+            "Abstractive Summary": [abstractive_res],
+            "Extractive Summary": [extractive_res],
+            "Query-based Summary": [query_res],
+            "Sentiment Analysis": [str(sentiment_results)]
+        })
+        csv_report = df_report.to_csv(index=False)
+        st.download_button("Download Report", csv_report, file_name="analysis_report.csv", mime="text/csv")
+
+    if st.button("Back to Data Entry"):
+        st.session_state.input_text = ""
+        st.session_state.data_submitted = False
+        st.session_state.page = "data_entry"
+        st.rerun()
+
+
+def aggregated_analysis_page():
+    st.title("Comprehensive Letters Analysis")
+
+    # 1) Ensure user has actually uploaded multiple files
+    if not st.session_state.get("data_submitted", False):
+        st.warning("No data submitted yet. Please go to the 'Data Entry' page and upload multiple files.")
+        return
+
+    if "uploaded_files_texts" not in st.session_state or len(st.session_state.uploaded_files_texts) < 2:
+        st.warning("No multiple-file data found. Please go to the 'Data Entry' page and upload multiple files.")
+        return
+
+    # 2) Show an icon & original text in the sidebar
+    with st.sidebar:
+        # This helper picks the right icon based on the number & types of files
+        icon_path = pick_sidebar_icon(
+            st.session_state.get("num_files", 0),
+            st.session_state.get("file_types", [])
+        )
+        st.image(icon_path, width=150)
+
+        with st.expander("Original Text", expanded=False):
+            st.write(st.session_state.get("input_text", "No text available."))
+
+    # 3) Prepare data
+    uploaded_texts = st.session_state.uploaded_files_texts
+    df_agg = pd.DataFrame({"text": uploaded_texts})
+    df_agg["clean_text"] = df_agg["text"].apply(comprehensive_text_preprocessing)
+    texts_clean = df_agg["clean_text"].tolist()
+
+    # 4) Classification
+    labels, vectorizer, kmeans = unsupervised_classification(texts_clean, num_clusters=2)
+    cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
+    df_agg["classification"] = [cluster_mapping[label] for label in labels]
+
+    st.subheader("Classification Distribution")
+    class_counts = df_agg["classification"].value_counts()
+    st.write(class_counts)
+    st.plotly_chart(plot_classification_distribution(class_counts))
+
+    # 5) Topic Modeling for each classification
+    for category in candidate_labels:
+        subset_texts = df_agg[df_agg["classification"] == category]["clean_text"].tolist()
+        if subset_texts:
+            topics = topic_modeling(subset_texts, num_topics=5)
+            st.subheader(f"Extracted Topics for {category}")
+            for topic in topics:
+                dynamic_label = dynamic_topic_label(topic)
+                st.write(f"{dynamic_label} (Keywords: {topic})")
+
+    # 6) Aggregated sentiment
+    def get_vader_compound(txt):
+        return sentiment_analysis(txt)["vader_scores"]["compound"]
+
+    df_agg["sentiment_polarity"] = df_agg["text"].apply(get_vader_compound)
+    st.subheader("Average Sentiment Polarity")
+    avg_sentiment = df_agg["sentiment_polarity"].mean()
+    st.write(avg_sentiment)
+    st.plotly_chart(plot_sentiment_distribution(avg_sentiment))
+
+    st.subheader("Sentiment Gauge (Aggregated)")
+    st.plotly_chart(plot_sentiment_gauge(avg_sentiment))
+
+    # 7) Export options
+    report_csv = df_agg.to_csv(index=False)
+    st.download_button("Download Report (CSV)", report_csv, file_name="aggregated_report.csv", mime="text/csv")
+
+    pdf_bytes = generate_pdf_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
+    st.download_button("Download Report (PDF)", pdf_bytes, file_name="aggregated_report.pdf", mime="application/pdf")
+
+    docx_bytes = generate_docx_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
+    st.download_button("Download Report (DOCX)", docx_bytes, file_name="aggregated_report.docx",
+                       mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+    # 8) Navigation
+    if st.button("Back to Data Entry"):
+        st.session_state.input_text = ""
+        st.session_state.data_submitted = False
+        st.session_state.page = "data_entry"
+        st.rerun()
+
+
 def main():
     st.set_page_config(layout="wide", page_title="Bolsover District Council - Analysis")
     st.sidebar.image("src/img/Bolsover_District_Council_logo.svg", width=150)
 
-    # Check if data has been submitted and if files were uploaded
+    # Only if data has been submitted in Upload File mode, show dynamic icon and original text expander
     if st.session_state.get("data_submitted", False) and st.session_state.get("data_mode") == "Upload File":
-        file_types = st.session_state.get("uploaded_files_types", [])
-        # Determine which image to display based on the number and types of files:
-        if len(file_types) == 1:
-            # Single file: decide based on its type
-            if file_types[0] == "application/pdf":
-                status_img = "src/img/Single_Pdf.svg"
-            elif file_types[0] in ["application/msword",
-                                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
-                status_img = "src/img/Single_Doc.svg"
-            else:
-                status_img = "src/img/Single_Default.svg"
-        else:
-            # Multiple files
-            if all(ft == "application/pdf" for ft in file_types):
-                status_img = "src/img/Multiple_Pdf.svg"
-            elif all(ft in ["application/msword",
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"] for ft in
-                     file_types):
-                status_img = "src/img/Multiple_Doc.svg"
-            else:
-                status_img = "src/img/Multiple_Both.svg"
-        st.sidebar.image(status_img, width=160)
-        # Show the Original Text in an expander automatically (no button needed)
+        file_info = st.session_state.get("uploaded_file_info", {})
+        num_files = file_info.get("num_files", 0)
+        file_extensions = file_info.get("file_extensions", set())
+        icon_path = get_file_icon_path(num_files, file_extensions)
+        st.sidebar.image(icon_path, width=150)
         with st.sidebar.expander("Original Text", expanded=False):
             st.write(st.session_state.get("input_text", "No text available."))
 
@@ -605,283 +990,6 @@ def main():
         results_page()
     elif st.session_state.page == "aggregated_analysis":
         aggregated_analysis_page()
-
-
-def data_entry_page():
-    st.title("Letter Submission (Data Entry)")
-    data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"])
-    input_text = ""
-    uploaded_files = []
-
-    if data_mode == "Paste Text":
-        input_text = st.text_area("Paste your letter text here", height=200)
-    else:
-        # Allow multiple file uploads
-        uploaded_files = st.file_uploader(
-            "Upload files (txt, csv, pdf, doc, docx)",
-            type=["txt", "csv", "pdf", "doc", "docx"],
-            accept_multiple_files=True
-        )
-
-    if st.button("Submit"):
-        with st.spinner("Processing..."):
-            if data_mode == "Paste Text":
-                if not input_text.strip():
-                    st.warning("Please paste some text before submitting.")
-                    return
-                st.session_state.input_text = input_text
-                st.session_state.data_submitted = True
-                st.session_state.page = "results"
-                st.rerun()
-                return
-            elif data_mode == "Upload File":
-                if not uploaded_files:
-                    st.warning("Please upload at least one file.")
-                    return
-
-                # New: store file types for later image selection
-                file_types = []
-                st.session_state.uploaded_files_texts = []
-                combined_text = ""
-                for file in uploaded_files:
-                    file_types.append(file.type)
-                    file_text = ""
-                    if file.type == "text/plain":
-                        file_text = file.read().decode("utf-8")
-                    elif file.type == "text/csv":
-                        df = pd.read_csv(file)
-                        file_text = " ".join(df['text'].astype(str).tolist())
-                    elif file.type == "application/pdf":
-                        try:
-                            from PyPDF2 import PdfReader
-                            reader = PdfReader(file)
-                            for page in reader.pages:
-                                file_text += page.extract_text() + "\n\n"
-                        except Exception as e:
-                            st.write(f"Error processing PDF {file.name}: {e}")
-                    elif file.type in [
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "application/msword"
-                    ]:
-                        try:
-                            import docx2txt
-                            file_text = docx2txt.process(file)
-                        except Exception as e:
-                            st.write(f"Error processing DOC/DOCX {file.name}: {e}")
-                    else:
-                        file_text = file.read().decode("utf-8")
-                    st.session_state.uploaded_files_texts.append(file_text)
-                    combined_text += file_text + "\n\n"
-
-                st.session_state.input_text = combined_text
-                st.session_state.uploaded_files_types = file_types  # Save file types in session state
-                st.session_state.data_submitted = True
-                if len(uploaded_files) > 1:
-                    st.session_state.page = "aggregated_analysis"
-                else:
-                    st.session_state.page = "results"
-                st.rerun()
-            else:
-                st.warning("Please provide either pasted text or at least one uploaded file.")
-
-
-def results_page():
-    st.title("Individual Letter Analysis")
-    if "data_submitted" not in st.session_state or not st.session_state.data_submitted:
-        st.warning("No data submitted yet. Please go to the 'Data Entry' page, provide a letter, and click Submit.")
-    else:
-        letter_text = st.session_state.input_text
-
-        # (Original Text is now shown via the sidebar button/expander)
-
-        # Preprocessing + classification
-        letter_clean = comprehensive_text_preprocessing(letter_text)
-        classifier = get_zero_shot_classifier()
-        classification_result = classifier(letter_clean, candidate_labels)
-        letter_class = classification_result["labels"][0]
-        st.subheader("Classification")
-        st.write(f"This letter is classified as: **{letter_class}**")
-
-        # Compute topic
-        topic_label, top_keywords = compute_topic(letter_clean)
-        st.subheader("Topic")
-        st.write(f"Topic: **{topic_label}**")
-
-        # Abstractive & extractive summaries
-        abstractive_res = abstractive_summarization(letter_text)
-        extractive_res = extractive_summarization(letter_text)
-
-        # Card-style layout for summaries
-        st.markdown(
-            """
-            <style>
-            .card {
-                box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-                transition: 0.3s;
-                border-radius: 5px;
-                padding: 16px;
-                margin: 10px 0;
-                background-color: var(--background-color);
-                color: var(--text-color);
-            }
-            .card:hover {
-                box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-            }
-            /* Light mode */
-            [data-theme="light"] .card {
-                --background-color: #F0F2F6;
-                --text-color: #000000;
-            }
-            /* Dark mode */
-            [data-theme="dark"] .card {
-                --background-color: #262730;
-                --text-color: #FFFFFF;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("💡 Key Takeaways")
-            st.markdown(f"""
-                <div class="card">
-                    <p>{abstractive_res}</p>
-                </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            st.subheader("🔍 Highlighted Sentences")
-            st.markdown(f"""
-                <div class="card">
-                    <p>{extractive_res}</p>
-                </div>
-            """, unsafe_allow_html=True)
-
-        # Inquisitive Summary + user query (input label removed)
-        st.subheader("❓ Inquisitive Summary")
-        user_query = st.text_input("Query", "What actions are being urged in the letter?")
-        query_res = query_based_summarization(letter_text, query=user_query)
-        refined_query_res = paraphrase_text(query_res)
-        st.write(personalize_summary(refined_query_res, "query"))
-
-        # Resident Mood Overview
-        st.subheader("🗣️ Resident Mood Overview")
-        sentiment_results = sentiment_analysis(letter_text)
-        transformer_score = sentiment_results["transformer_result"]["score"]
-        vader_compound = sentiment_results["vader_scores"]["compound"]
-
-        sentiment_label = sentiment_results["sentiment_label"]
-        explanation = sentiment_results["explanation"]
-
-        col_mood, col_gauge = st.columns(2)
-        with col_mood:
-            st.write(f"**Mood:** {sentiment_label}")
-            st.write(explanation)
-        with col_gauge:
-            gauge_fig = plot_sentiment_gauge(vader_compound)
-            st.plotly_chart(gauge_fig)
-
-        # Export format
-        export_format = st.selectbox("Select Export Format", ["PDF", "DOCX", "TXT", "CSV"])
-        if export_format == "PDF":
-            file_bytes = generate_pdf_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
-            st.download_button("Download Report", file_bytes, file_name="analysis_report.pdf", mime="application/pdf")
-        elif export_format == "DOCX":
-            file_bytes = generate_docx_report(letter_text, abstractive_res, extractive_res, query_res,
-                                              sentiment_results)
-            st.download_button("Download Report", file_bytes, file_name="analysis_report.docx",
-                               mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-        elif export_format == "TXT":
-            txt_report = (
-                f"Analysis Report\n\nOriginal Text:\n{letter_text}\n\nAbstractive Summary:\n{abstractive_res}\n\n"
-                f"Extractive Summary:\n{extractive_res}\n\nQuery-based Summary:\n{query_res}\n\n"
-                f"Sentiment Analysis:\n{sentiment_results}"
-            )
-            st.download_button("Download Report", txt_report, file_name="analysis_report.txt", mime="text/plain")
-        elif export_format == "CSV":
-            df_report = pd.DataFrame({
-                "Original Text": [letter_text],
-                "Abstractive Summary": [abstractive_res],
-                "Extractive Summary": [extractive_res],
-                "Query-based Summary": [query_res],
-                "Sentiment Analysis": [str(sentiment_results)]
-            })
-            csv_report = df_report.to_csv(index=False)
-            st.download_button("Download Report", csv_report, file_name="analysis_report.csv", mime="text/csv")
-
-        if st.button("Back to Data Entry"):
-            st.session_state.input_text = ""
-            st.session_state.data_submitted = False
-            st.session_state.page = "data_entry"
-            st.rerun()
-
-
-def aggregated_analysis_page():
-    st.title("Comprehensive Letters Analysis")
-
-    # Check if the multiple file texts have been stored in session_state
-    if "uploaded_files_texts" not in st.session_state or not st.session_state.uploaded_files_texts:
-        st.warning("No multiple-file data found. Please go to the 'Data Entry' page and upload multiple files.")
-        return
-
-    # Use the already uploaded texts from the Data Entry page
-    uploaded_texts = st.session_state.uploaded_files_texts
-
-    # Create a DataFrame from the uploaded texts and process them
-    df_agg = pd.DataFrame({"text": uploaded_texts})
-    df_agg["clean_text"] = df_agg["text"].apply(comprehensive_text_preprocessing)
-    texts_clean = df_agg["clean_text"].tolist()
-
-    # Perform unsupervised classification and label each document
-    labels, vectorizer, kmeans = unsupervised_classification(texts_clean, num_clusters=2)
-    cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
-    df_agg["classification"] = [cluster_mapping[label] for label in labels]
-
-    st.subheader("Classification Distribution")
-    class_counts = df_agg["classification"].value_counts()
-    st.write(class_counts)
-    st.plotly_chart(plot_classification_distribution(class_counts))
-
-    # Extract and display topics for each candidate label
-    for category in candidate_labels:
-        subset_texts = df_agg[df_agg["classification"] == category]["clean_text"].tolist()
-        if subset_texts:
-            topics = topic_modeling(subset_texts, num_topics=5)
-            st.subheader(f"Extracted Topics for {category}")
-            for topic in topics:
-                dynamic_label = dynamic_topic_label(topic)
-                st.write(f"{dynamic_label} (Keywords: {topic})")
-
-    # Compute aggregated sentiment (average of VADER compound scores)
-    def get_vader_compound(txt):
-        return sentiment_analysis(txt)["vader_scores"]["compound"]
-
-    df_agg["sentiment_polarity"] = df_agg["text"].apply(get_vader_compound)
-    st.subheader("Average Sentiment Polarity")
-    avg_sentiment = df_agg["sentiment_polarity"].mean()
-    st.write(avg_sentiment)
-    st.plotly_chart(plot_sentiment_distribution(avg_sentiment))
-
-    st.subheader("Sentiment Gauge (Aggregated)")
-    st.plotly_chart(plot_sentiment_gauge(avg_sentiment))
-
-    # Export options
-    report_csv = df_agg.to_csv(index=False)
-    st.download_button("Download Report (CSV)", report_csv, file_name="aggregated_report.csv", mime="text/csv")
-
-    pdf_bytes = generate_pdf_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-    st.download_button("Download Report (PDF)", pdf_bytes, file_name="aggregated_report.pdf", mime="application/pdf")
-
-    docx_bytes = generate_docx_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-    st.download_button("Download Report (DOCX)", docx_bytes, file_name="aggregated_report.docx",
-                       mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-
-    if st.button("Back to Data Entry"):
-        st.session_state.input_text = ""
-        st.session_state.data_submitted = False
-        st.session_state.page = "data_entry"
-        st.rerun()
 
 
 if __name__ == '__main__':
