@@ -35,10 +35,12 @@ from rake_nltk import Rake
 # ------------------ Transformers and Deep Learning Models ------------------
 from transformers import pipeline as hf_pipeline
 import sentencepiece
-
+from transformers import pipeline as hf_pipeline, AutoTokenizer
+from sentence_transformers import SentenceTransformer, util
+import torch
 # ------------------ Visualization ------------------
 import plotly.graph_objects as go
-
+import plotly.express as px
 # ------------------ Web App Framework ------------------
 import streamlit as st
 
@@ -75,6 +77,18 @@ def get_abstractive_summarizer():
 @st.cache_resource
 def get_sentiment_pipeline():
     return hf_pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+
+@st.cache_resource
+def get_qa_pipeline():
+    return hf_pipeline(
+        "question-answering",
+        model="deepset/roberta-base-squad2",
+        tokenizer="deepset/roberta-base-squad2"
+    )
+
+@st.cache_resource
+def get_embeddings_model():
+    return SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 
 # ------------------ Paraphrasing Function ------------------
@@ -115,6 +129,58 @@ def sanitize_text(text: str) -> str:
     for orig, repl in replacements.items():
         text = text.replace(orig, repl)
     return ''.join(c if ord(c) < 256 else '?' for c in text)
+
+
+# ------------------ AI Search Implementation ------------------
+def ai_question_answer(question, documents):
+    # 1. Document Chunking
+    tokenizer = AutoTokenizer.from_pretrained("deepset/roberta-base-squad2")
+    max_length = 384  # Model's max input size
+    chunks = []
+    for doc in documents:
+        words = doc.split()
+        current_chunk = []
+        current_length = 0
+        for word in words:
+            current_chunk.append(word)
+            current_length += len(tokenizer.tokenize(word))
+            if current_length >= max_length - 2:  # Account for [CLS] and [SEP]
+                chunks.append(" ".join(current_chunk))
+                current_chunk = []
+                current_length = 0
+        if current_chunk:
+            chunks.append(" ".join(current_chunk))
+
+    # 2. Semantic Search
+    embedder = get_embeddings_model()
+    question_embedding = embedder.encode(question, convert_to_tensor=True)
+    doc_embeddings = embedder.encode(chunks, convert_to_tensor=True)
+
+    # Find top 3 relevant chunks
+    cos_scores = util.cos_sim(question_embedding, doc_embeddings)[0]
+    top_results = torch.topk(cos_scores, k=min(3, len(chunks)))
+
+    # 3. Answer Generation
+    qa_pipeline = get_qa_pipeline()
+    context = " ".join([chunks[i] for i in top_results.indices])
+
+    # Handle no context case
+    if not context.strip():
+        return "I couldn't find relevant information in the documents to answer that question."
+
+    # Generate answer
+    result = qa_pipeline(
+        question=question,
+        context=context,
+        max_answer_len=150,
+        handle_impossible_answer=True
+    )
+
+    # Format response
+    if result['score'] < 0.1:  # Confidence threshold
+        return "I'm not entirely sure, but based on the documents: " + result['answer']
+
+    return result['answer']
 
 
 # ------------------ Expanded Candidate Labels for Topic Detection ------------------
@@ -605,21 +671,21 @@ def pick_sidebar_icon(num_files, file_types):
         return "src/img/Multiple_Default.svg"
     if num_files == 1:
         ft = next(iter(file_types))
-        if ft == "application/pdf":
+        if ft == "pdf":
             return "src/img/Single_Pdf.svg"
-        elif ft in ("application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
+        elif ft == "doc":
             return "src/img/Single_Doc.svg"
         else:
             return "src/img/Single_Default.svg"
-    if file_types == {"application/pdf"}:
+    # For multiple files
+    if file_types == {"pdf"}:
         return "src/img/Multiple_Pdf.svg"
-    elif file_types.issubset({"application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}):
+    elif file_types == {"doc"}:
         return "src/img/Multiple_Doc.svg"
-    elif {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"} & file_types:
+    elif len(file_types) > 1:  # Mixed types
         return "src/img/Multiple_Both.svg"
     else:
         return "src/img/Multiple_Default.svg"
-
 
 def data_entry_page():
     st.title("Letter Submission (Data Entry)")
@@ -678,7 +744,7 @@ def data_entry_page():
                             ])
 
                         elif file_type in ["application/msword",
-                                           "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
                             doc = Document(file)
                             text = "\n".join([
                                 para.text
@@ -707,15 +773,16 @@ def data_entry_page():
                 st.session_state.data_submitted = True
                 st.session_state.data_mode = data_mode
 
-                # Handle file type icons
+                # Handle file type icons (simplified to pdf/doc/other)
                 ext_set = set()
                 for ft in file_types:
-                    if "pdf" in ft.lower():
+                    ft_lower = ft.lower()
+                    if "pdf" in ft_lower:
                         ext_set.add("pdf")
-                    elif "msword" in ft.lower() or "wordprocessingml.document" in ft.lower():
+                    elif "msword" in ft_lower or "wordprocessingml.document" in ft_lower:
                         ext_set.add("doc")
                     else:
-                        ext_set.add("default")
+                        ext_set.add("other")
 
                 st.session_state.uploaded_file_info = {
                     "num_files": len(uploaded_files),
@@ -730,43 +797,35 @@ def data_entry_page():
 
                 st.rerun()
 
+
 def results_page():
     st.title("Individual Letter Analysis")
     if "data_submitted" not in st.session_state or not st.session_state.data_submitted:
         st.warning("No data submitted yet. Please go to the 'Data Entry' page, provide a letter, and click Submit.")
         return
 
-    letter_text = st.session_state.get("input_text", "")
+    # Get text based on input method
+    if st.session_state.data_mode == "Upload File":
+        if "uploaded_files_texts" in st.session_state and len(st.session_state.uploaded_files_texts) >= 1:
+            letter_text = st.session_state.uploaded_files_texts[0]
+        else:
+            st.error("No text found in uploaded file")
+            return
+    else:
+        letter_text = st.session_state.get("input_text", "")
 
     # Sidebar: Show a dynamic icon based on the upload type.
+    # Sidebar: Unified icon handling
     with st.sidebar:
-        # If user pasted text, always show the single default icon.
-        if st.session_state.get("data_mode") == "Paste Text":
-            icon_path = "src/img/Single_Default.svg"
-        else:
-            # For file uploads, use the uploaded_files_types set
-            file_types = st.session_state.get("uploaded_files_types", set())
-            if len(file_types) == 1:
-                ft = next(iter(file_types))
-                if ft == "application/pdf":
-                    icon_path = "src/img/Single_Pdf.svg"
-                elif ft in ["application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
-                    icon_path = "src/img/Single_Doc.svg"
-                else:
-                    icon_path = "src/img/Single_Default.svg"
-            else:
-                # Multiple files uploaded
-                if file_types == {"application/pdf"}:
-                    icon_path = "src/img/Multiple_Pdf.svg"
-                elif file_types.issubset({"application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}):
-                    icon_path = "src/img/Multiple_Doc.svg"
-                elif {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"} & file_types:
-                    icon_path = "src/img/Multiple_Both.svg"
-                else:
-                    icon_path = "src/img/Multiple_Default.svg"
+        file_info = st.session_state.get("uploaded_file_info", {})
+        num_files = file_info.get("num_files", 0)
+        ext_set = file_info.get("file_extensions", set())
+
+        icon_path = pick_sidebar_icon(num_files, ext_set)
         st.image(icon_path, width=150)
-        with st.expander("Original Text", expanded=False):
-            st.write(letter_text)
+
+        with st.expander("Original Letter", expanded=False):
+            st.write(letter_text if letter_text.strip() else "No text available")
 
     # Continue processing for individual analysis
     letter_clean = comprehensive_text_preprocessing(letter_text)
@@ -887,7 +946,7 @@ def results_page():
 def aggregated_analysis_page():
     st.title("Comprehensive Letters Analysis")
 
-    # 1) Ensure user has actually uploaded multiple files
+    # 1) Check data availability
     if not st.session_state.get("data_submitted", False):
         st.warning("No data submitted yet. Please go to the 'Data Entry' page and upload multiple files.")
         return
@@ -896,16 +955,16 @@ def aggregated_analysis_page():
         st.warning("No multiple-file data found. Please go to the 'Data Entry' page and upload multiple files.")
         return
 
-    # 2) Show an icon & original text in the sidebar
+    # 2) Sidebar content
     with st.sidebar:
-        # This helper picks the right icon based on the number & types of files
-        icon_path = pick_sidebar_icon(
-            st.session_state.get("num_files", 0),
-            st.session_state.get("file_types", [])
-        )
+        file_info = st.session_state.get("uploaded_file_info", {})
+        num_files = file_info.get("num_files", 0)
+        ext_set = file_info.get("file_extensions", set())
+
+        icon_path = pick_sidebar_icon(num_files, ext_set)
         st.image(icon_path, width=150)
 
-        with st.expander("Original Text", expanded=False):
+        with st.expander("Original Letter", expanded=False):
             st.write(st.session_state.get("input_text", "No text available."))
 
     # 3) Prepare data
@@ -919,46 +978,214 @@ def aggregated_analysis_page():
     cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
     df_agg["classification"] = [cluster_mapping[label] for label in labels]
 
-    st.subheader("Classification Distribution")
-    class_counts = df_agg["classification"].value_counts()
-    st.write(class_counts)
-    st.plotly_chart(plot_classification_distribution(class_counts))
+    # 5) Calculate Key Metrics
+    total_letters = len(df_agg)
+    class_counts = df_agg["classification"].value_counts(normalize=True) * 100
+    local_problems_pct = class_counts.get("Local Problem", 0)
+    new_initiatives_pct = class_counts.get("New Initiatives", 0)
 
-    # 5) Topic Modeling for each classification
-    for category in candidate_labels:
-        subset_texts = df_agg[df_agg["classification"] == category]["clean_text"].tolist()
-        if subset_texts:
-            topics = topic_modeling(subset_texts, num_topics=5)
-            st.subheader(f"Extracted Topics for {category}")
-            for topic in topics:
-                dynamic_label = dynamic_topic_label(topic)
-                st.write(f"{dynamic_label} (Keywords: {topic})")
+    # Key Metrics Cards
+    st.markdown("### Key Metrics")
+    kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
 
-    # 6) Aggregated sentiment
-    def get_vader_compound(txt):
-        return sentiment_analysis(txt)["vader_scores"]["compound"]
+    theme_base = st.get_option("theme.base")
+    bg_color = "#FFFFFF" if theme_base == "light" else "#222"
+    text_color = "#000000" if theme_base == "light" else "#FFFFFF"
 
-    df_agg["sentiment_polarity"] = df_agg["text"].apply(get_vader_compound)
-    st.subheader("Average Sentiment Polarity")
-    avg_sentiment = df_agg["sentiment_polarity"].mean()
-    st.write(avg_sentiment)
-    st.plotly_chart(plot_sentiment_distribution(avg_sentiment))
+    with kpi_col1:
+        st.markdown(f"""
+        <div style='background-color:{bg_color}; padding:15px; border-radius:10px; text-align:center; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);'>
+            <h3 style='color:{text_color};'>📩 Total Letters</h3>
+            <h2 style='color:{text_color};'>{total_letters}</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.subheader("Sentiment Gauge (Aggregated)")
-    st.plotly_chart(plot_sentiment_gauge(avg_sentiment))
+    with kpi_col2:
+        st.markdown(f"""
+        <div style='background-color:{bg_color}; padding:15px; border-radius:10px; text-align:center; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);'>
+            <h3 style='color:{text_color};'>📍 Local Problems</h3>
+            <h2 style='color:{text_color};'>{local_problems_pct:.1f}%</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # 7) Export options
+    with kpi_col3:
+        st.markdown(f"""
+        <div style='background-color:{bg_color}; padding:15px; border-radius:10px; text-align:center; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);'>
+            <h3 style='color:{text_color};'>✨ New Initiatives</h3>
+            <h2 style='color:{text_color};'>{new_initiatives_pct:.1f}%</h2>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 6) Most Common Issues
+    st.subheader("Most Common Issues")
+
+    # Get topics and their keywords
+    topics = topic_modeling(texts_clean, num_topics=3)
+
+    # Create regex patterns for exact word matching
+    issues_data = []
+    for topic in topics:
+        keywords = [re.escape(kw.strip()) for kw in topic.split(',')]
+        pattern = r'\b(' + '|'.join(keywords) + r')\b'
+
+        # Count matches with case insensitivity
+        count = df_agg['clean_text'].str.contains(
+            pattern,
+            regex=True,
+            case=False,
+            na=False
+        ).sum()
+
+        issues_data.append({
+            "Issue": dynamic_topic_label(topic),
+            "Count": count,
+            "Percentage": (count / len(df_agg) * 100)
+        })
+
+    # Create and sort DataFrame
+    issues_df = pd.DataFrame(issues_data).sort_values('Count', ascending=False)
+
+    # Format percentages
+    issues_df['Percentage'] = issues_df['Percentage'].round(1)
+
+    # Create visualization with combined labels
+    fig = px.bar(
+        issues_df,
+        x="Issue",
+        y="Count",
+        text="Percentage",
+        labels={'Count': 'Number of Complaints', 'Percentage': 'Percentage'},
+        color="Issue"
+    )
+
+    # Improve label formatting
+    fig.update_traces(
+        texttemplate='%{text}%',
+        textposition='outside',
+        hovertemplate="<b>%{x}</b><br>Count: %{y}<br>Percentage: %{text}%"
+    )
+
+    # Set axis limits based on data
+    max_count = issues_df['Count'].max()
+    fig.update_layout(
+        yaxis_range=[0, max_count * 1.2],
+        showlegend=False
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 7) Classification & Sentiment Analysis
+    st.subheader("📊 Classification Distribution & 😊 Sentiment Analysis")
+    col4, col5 = st.columns(2)
+
+    with col4:
+        # Classification Distribution
+        class_counts = df_agg["classification"].value_counts()
+        fig_classification = px.pie(
+            class_counts,
+            values=class_counts.values,
+            names=class_counts.index,
+            title="Classification Distribution"
+        )
+        st.plotly_chart(fig_classification, use_container_width=True)
+
+    with col5:
+        # Sentiment Analysis
+        df_agg["sentiment"] = df_agg["text"].apply(lambda x: sentiment_analysis(x)["sentiment_label"])
+        sentiment_counts = df_agg["sentiment"].value_counts()
+        fig_sentiment = px.bar(
+            sentiment_counts,
+            x=sentiment_counts.index,
+            y=sentiment_counts.values,
+            title="Sentiment Analysis",
+            color=sentiment_counts.index
+        )
+        st.plotly_chart(fig_sentiment, use_container_width=True)
+
+    # 8) Key Takeaways & Highlighted Sentences
+    col6, col7 = st.columns(2)
+
+    with col6:
+        st.subheader("💡 Key Takeaways")
+        try:
+            key_takeaways = " ".join([abstractive_summarization(text)
+                                      for text in st.session_state.uploaded_files_texts[:3]])
+            st.markdown(f"""
+                <div class="card">
+                    <p>{key_takeaways[:500]}</p>  
+                </div>
+            """, unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"Key Takeaways Error: {str(e)}")
+            st.session_state.page = "data_entry"
+            st.rerun()
+
+    with col7:
+        st.subheader("🔍 Highlighted Sentences")
+        try:
+            highlighted = " ".join([extractive_summarization(text, 1)
+                                    for text in st.session_state.uploaded_files_texts[:3]])
+            st.markdown(f"""
+                <div class="card">
+                    <p>{highlighted[:500]}</p>  
+                </div>
+            """, unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"Highlight Error: {str(e)}")
+            st.session_state.page = "data_entry"
+            st.rerun()
+
+    # AI Search Section
+    st.subheader("🔍 AI Document Analyst")
+    user_question = st.text_input("Ask anything about the letters:",
+                                  placeholder="e.g. What are the main complaints about waste management?")
+
+    if user_question:
+        with st.spinner("Analyzing documents..."):
+            try:
+                # Get all uploaded texts
+                documents = st.session_state.uploaded_files_texts
+
+                # Get AI response
+                response = ai_question_answer(user_question, documents)
+
+                # Display response
+                st.markdown(f"""
+                <div style='
+                    padding: 15px;
+                    border-radius: 10px;
+                    background-color: #f0f2f6;
+                    margin: 10px 0;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                '>
+                    <p style='font-size: 16px; color: #333;'>{response}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+            except Exception as e:
+                st.error(f"Error processing question: {str(e)}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # 9) Export options
+    st.subheader("Export Options")
     report_csv = df_agg.to_csv(index=False)
     st.download_button("Download Report (CSV)", report_csv, file_name="aggregated_report.csv", mime="text/csv")
 
-    pdf_bytes = generate_pdf_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-    st.download_button("Download Report (PDF)", pdf_bytes, file_name="aggregated_report.pdf", mime="application/pdf")
-
-    docx_bytes = generate_docx_report("Aggregated Report", "N/A", "N/A", "N/A", df_agg.to_dict())
-    st.download_button("Download Report (DOCX)", docx_bytes, file_name="aggregated_report.docx",
-                       mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-
-    # 8) Navigation
+    # # 10) Navigation
     if st.button("Back to Data Entry"):
         st.session_state.input_text = ""
         st.session_state.data_submitted = False
@@ -966,19 +1193,12 @@ def aggregated_analysis_page():
         st.rerun()
 
 
+
 def main():
     st.set_page_config(layout="wide", page_title="Bolsover District Council - Analysis")
     st.sidebar.image("src/img/Bolsover_District_Council_logo.svg", width=150)
 
-    # Only if data has been submitted in Upload File mode, show dynamic icon and original text expander
-    if st.session_state.get("data_submitted", False) and st.session_state.get("data_mode") == "Upload File":
-        file_info = st.session_state.get("uploaded_file_info", {})
-        num_files = file_info.get("num_files", 0)
-        file_extensions = file_info.get("file_extensions", set())
-        icon_path = get_file_icon_path(num_files, file_extensions)
-        st.sidebar.image(icon_path, width=150)
-        with st.sidebar.expander("Original Text", expanded=False):
-            st.write(st.session_state.get("input_text", "No text available."))
+    # Only if data has been submitted in Upload File mode, show dynamic icon and original letter expander
 
     # Page selection logic
     if "page" not in st.session_state:
