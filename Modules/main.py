@@ -234,22 +234,19 @@ if __name__ == "__main__":
 
 
 
-
-
-
 # ------------------ Standard Libraries ------------------
 import os
 import io
 import ssl
 import re
 
+# ------------------ # Add to file reading imports ------------------
+import PyPDF2
+from docx import Document
+
 # ------------------ Data Handling and Numerical Processing ------------------
 import pandas as pd
 import numpy as np
-
-# ------------------ (General) ------------------
-from fpdf import FPDF
-from docx import Document
 
 # ------------------ NLP Libraries (General) ------------------
 import nltk
@@ -749,6 +746,9 @@ def plot_sentiment_gauge(polarity):
 
 
 # ------------------ Report Generation Functions ------------------
+from fpdf import FPDF
+from docx import Document
+
 
 def generate_pdf_report(original_text, abstractive_summary, extractive_summary, query_summary, sentiment_results):
     original_text = sanitize_text(original_text)
@@ -836,6 +836,26 @@ def get_file_icon_path(num_files, file_extensions):
     else:
         return "src/img/Multiple_default.svg"
 
+def pick_sidebar_icon(num_files, file_types):
+    if num_files == 0:
+        return "src/img/Multiple_Default.svg"
+    if num_files == 1:
+        ft = next(iter(file_types))
+        if ft == "pdf":
+            return "src/img/Single_Pdf.svg"
+        elif ft == "doc":
+            return "src/img/Single_Doc.svg"
+        else:
+            return "src/img/Single_Default.svg"
+    # For multiple files
+    if file_types == {"pdf"}:
+        return "src/img/Multiple_Pdf.svg"
+    elif file_types == {"doc"}:
+        return "src/img/Multiple_Doc.svg"
+    elif len(file_types) > 1:  # Mixed types
+        return "src/img/Multiple_Both.svg"
+    else:
+        return "src/img/Multiple_Default.svg"
 
 def data_entry_page():
     st.title("Letter Submission (Data Entry)")
@@ -846,19 +866,16 @@ def data_entry_page():
 
     if data_mode == "Paste Text":
         input_text = st.text_area("Paste your letter text here", height=200)
-
     else:
         uploaded_files = st.file_uploader(
-            "Upload files (txt, csv, pdf, doc, docx)",
-            type=["txt", "csv", "pdf", "doc", "docx"],
+            "Upload files (txt, pdf, doc, docx)",
+            type=["txt", "pdf", "doc", "docx"],
             accept_multiple_files=True
         )
 
     if st.button("Submit"):
         with st.spinner("Processing..."):
-
             if data_mode == "Paste Text":
-                # Make sure user actually pasted something
                 if not input_text.strip():
                     st.warning("Please paste some text before submitting.")
                     return
@@ -866,14 +883,10 @@ def data_entry_page():
                 st.session_state.input_text = input_text
                 st.session_state.data_submitted = True
                 st.session_state.data_mode = data_mode
-
-                # We consider a single letter “pasted”, so:
-                #  -> set a pseudo extension set {“paste”}
                 st.session_state.uploaded_file_info = {
                     "num_files": 1,
-                    "file_extensions": {"paste"}  # a custom marker
+                    "file_extensions": {"paste"}
                 }
-
                 st.session_state.page = "results"
                 st.rerun()
 
@@ -883,20 +896,54 @@ def data_entry_page():
                     return
 
                 file_types = []
-                st.session_state.uploaded_files_texts = []
+                extracted_texts = []
                 combined_text = ""
 
                 for file in uploaded_files:
-                    file_types.append(file.type)
-                    # ... read each file’s text ...
-                    # For brevity, skip the logic here.
-                    # Append to combined_text, st.session_state.uploaded_files_texts, etc.
+                    file_type = file.type
+                    file_types.append(file_type)
+                    text = ""
 
-                st.session_state.input_text = combined_text
+                    try:
+                        if file_type == "application/pdf":
+                            pdf_reader = PyPDF2.PdfReader(file)
+                            text = "\n".join([
+                                page.extract_text()
+                                for page in pdf_reader.pages
+                                if page.extract_text()
+                            ])
+
+                        elif file_type in ["application/msword",
+                                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                            doc = Document(file)
+                            text = "\n".join([
+                                para.text
+                                for para in doc.paragraphs
+                                if para.text.strip()
+                            ])
+
+                        elif file_type == "text/plain":
+                            text = file.getvalue().decode("utf-8")
+
+                    except Exception as e:
+                        st.error(f"Error reading {file.name}: {str(e)}")
+                        continue
+
+                    if text.strip():
+                        extracted_texts.append(text.strip())
+                        combined_text += f"\n\n{text.strip()}"
+
+                if not extracted_texts:
+                    st.error("Could not extract any text from uploaded files")
+                    return
+
+                # Update session state
+                st.session_state.uploaded_files_texts = extracted_texts
+                st.session_state.input_text = combined_text.strip()
                 st.session_state.data_submitted = True
                 st.session_state.data_mode = data_mode
 
-                # Convert MIME types -> simplified set {pdf, doc, default}, etc.
+                # Handle file type icons (simplified to pdf/doc/other)
                 ext_set = set()
                 for ft in file_types:
                     ft_lower = ft.lower()
@@ -905,67 +952,76 @@ def data_entry_page():
                     elif "msword" in ft_lower or "wordprocessingml.document" in ft_lower:
                         ext_set.add("doc")
                     else:
-                        ext_set.add("default")
+                        ext_set.add("other")
 
                 st.session_state.uploaded_file_info = {
                     "num_files": len(uploaded_files),
                     "file_extensions": ext_set
                 }
 
+                # Route to correct page
                 if len(uploaded_files) > 1:
                     st.session_state.page = "aggregated_analysis"
                 else:
                     st.session_state.page = "results"
 
                 st.rerun()
-            else:
-                st.warning("Please provide either pasted text or at least one uploaded file.")
 
 
 def results_page():
     st.title("Individual Letter Analysis")
-    if not st.session_state.get("data_submitted", False):
+    if "data_submitted" not in st.session_state or not st.session_state.data_submitted:
         st.warning("No data submitted yet. Please go to the 'Data Entry' page, provide a letter, and click Submit.")
         return
 
     letter_text = st.session_state.get("input_text", "")
 
-    # Sidebar: Display a dynamic icon and show the original text in an expander
+    # Sidebar: Show a dynamic icon based on the upload type.
     with st.sidebar:
-        # Check the input mode; if text was pasted, show a fixed "single" icon.
-        data_mode = st.session_state.get("data_mode", "Paste Text")
-        if data_mode == "Paste Text":
-            st.image("src/img/Single_default.svg", width=150)
+        # If user pasted text, always show the single default icon.
+        if st.session_state.get("data_mode") == "Paste Text":
+            icon_path = "src/img/Single_Default.svg"
         else:
-            # For uploaded files, use your dynamic icon helper.
-            # If you have a helper called pick_sidebar_icon, use it:
-            if "pick_sidebar_icon" in globals():
-                icon_path = pick_sidebar_icon(
-                    len(st.session_state.get("uploaded_files_types", [])),
-                    st.session_state.get("uploaded_files_types", [])
-                )
+            # For file uploads, use the uploaded_files_types set
+            file_types = st.session_state.get("uploaded_files_types", set())
+            if len(file_types) == 1:
+                ft = next(iter(file_types))
+                if ft == "application/pdf":
+                    icon_path = "src/img/Single_Pdf.svg"
+                elif ft in ["application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                    icon_path = "src/img/Single_Doc.svg"
+                else:
+                    icon_path = "src/img/Single_Default.svg"
             else:
-                # Otherwise, fall back to a default multi-file icon.
-                icon_path = "src/img/Multiple_Default.svg"
-            st.image(icon_path, width=150)
-
+                # Multiple files uploaded
+                if file_types == {"application/pdf"}:
+                    icon_path = "src/img/Multiple_Pdf.svg"
+                elif file_types.issubset({"application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}):
+                    icon_path = "src/img/Multiple_Doc.svg"
+                elif {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"} & file_types:
+                    icon_path = "src/img/Multiple_Both.svg"
+                else:
+                    icon_path = "src/img/Multiple_Default.svg"
+        st.image(icon_path, width=150)
         with st.expander("Original Text", expanded=False):
             st.write(letter_text)
 
-    # Preprocessing & Classification
+    # Continue processing for individual analysis
     letter_clean = comprehensive_text_preprocessing(letter_text)
     classifier = get_zero_shot_classifier()
-    classification_result = classifier(letter_clean, candidate_labels)
-    letter_class = classification_result["labels"][0]
+    if letter_clean.strip():
+        classification_result = classifier(letter_clean, candidate_labels)
+        letter_class = classification_result["labels"][0]
+    else:
+        letter_class = "Unclassified (insufficient text)"
+        st.warning("Could not classify - extracted text appears empty")
     st.subheader("Classification")
     st.write(f"This letter is classified as: **{letter_class}**")
 
-    # Topic Detection
     topic_label, top_keywords = compute_topic(letter_clean)
     st.subheader("Topic")
     st.write(f"Topic: **{topic_label}**")
 
-    # Summarization
     abstractive_res = abstractive_summarization(letter_text)
     extractive_res = extractive_summarization(letter_text)
 
@@ -1013,19 +1069,17 @@ def results_page():
             </div>
         """, unsafe_allow_html=True)
 
-    # Inquisitive Summary
     st.subheader("❓ Inquisitive Summary")
     user_query = st.text_input("Query", "What actions are being urged in the letter?")
     query_res = query_based_summarization(letter_text, query=user_query)
     refined_query_res = paraphrase_text(query_res)
     st.write(personalize_summary(refined_query_res, "query"))
 
-    # Sentiment Analysis
     st.subheader("🗣️ Resident Mood Overview")
     sentiment_results = sentiment_analysis(letter_text)
+    vader_compound = sentiment_results["vader_scores"]["compound"]
     sentiment_label = sentiment_results["sentiment_label"]
     explanation = sentiment_results["explanation"]
-    vader_compound = sentiment_results["vader_scores"]["compound"]
 
     col_mood, col_gauge = st.columns(2)
     with col_mood:
@@ -1035,7 +1089,6 @@ def results_page():
         gauge_fig = plot_sentiment_gauge(vader_compound)
         st.plotly_chart(gauge_fig)
 
-    # Export Options
     export_format = st.selectbox("Select Export Format", ["PDF", "DOCX", "TXT", "CSV"])
     if export_format == "PDF":
         file_bytes = generate_pdf_report(letter_text, abstractive_res, extractive_res, query_res, sentiment_results)
