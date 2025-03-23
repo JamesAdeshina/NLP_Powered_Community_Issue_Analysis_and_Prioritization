@@ -4,7 +4,7 @@ import io
 import ssl
 import re
 
-# ------------------ # Add to file reading imports ------------------
+# ------------------ File Handling Libraries ------------------
 import PyPDF2
 from docx import Document
 
@@ -12,7 +12,7 @@ from docx import Document
 import pandas as pd
 import numpy as np
 
-# ------------------ NLP Libraries (General) ------------------
+# ------------------ NLP Libraries ------------------
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
@@ -25,6 +25,7 @@ import contractions
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import LatentDirichletAllocation
+import torch
 
 # ------------------ Summarization and Topic Extraction ------------------
 from sumy.parsers.plaintext import PlaintextParser
@@ -33,14 +34,20 @@ from sumy.summarizers.lex_rank import LexRankSummarizer
 from rake_nltk import Rake
 
 # ------------------ Transformers and Deep Learning Models ------------------
-from transformers import pipeline as hf_pipeline
-import sentencepiece
-from transformers import pipeline as hf_pipeline, AutoTokenizer
+from transformers import pipeline
 from sentence_transformers import SentenceTransformer, util
-import torch
+from transformers import AutoTokenizer, AutoModelForTokenClassification
+
+# ------------------ Map Visualization ------------------
+from geopy.geocoders import Nominatim
+from opencage.geocoder import OpenCageGeocode
+import pydeck as pdk
+import requests
+
 # ------------------ Visualization ------------------
 import plotly.graph_objects as go
 import plotly.express as px
+
 # ------------------ Web App Framework ------------------
 import streamlit as st
 
@@ -76,7 +83,11 @@ def get_abstractive_summarizer():
 
 @st.cache_resource
 def get_sentiment_pipeline():
-    return hf_pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+    return hf_pipeline(
+        "sentiment-analysis",
+        model="distilbert-base-uncased-finetuned-sst-2-english",
+        return_all_scores=True
+    )
 
 @st.cache_resource
 def get_qa_pipeline():
@@ -89,6 +100,242 @@ def get_qa_pipeline():
 @st.cache_resource
 def get_embeddings_model():
     return SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+
+# ------------------ Location Extraction Functions ------------------
+@st.cache_resource
+def get_ner_pipeline():
+    tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
+    model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
+    return hf_pipeline("ner", model=model, tokenizer=tokenizer)
+
+UK_POSTCODE_REGEX = r'\b[A-Z]{1,2}\d{1,2}[A-Z]?\s\d[A-Z]{2}\b'
+UK_ADDRESS_REGEX = r'\b\d+\s[\w\s]+\b,\s[\w\s]+,\s' + UK_POSTCODE_REGEX
+
+# Function to geocode addresses
+
+def resolve_postcode_to_address(postcode, api_key):
+    """
+    Resolves a postcode to a full address using OpenCage Geocoder.
+    """
+    geocoder = OpenCageGeocode(api_key)
+
+    try:
+        # Query the geocoder with the postcode
+        results = geocoder.geocode(f"{postcode}, UK")
+
+        if results and len(results) > 0:
+            # Extract the formatted address from the first result
+            full_address = results[0]['formatted']
+            return full_address
+        else:
+            st.warning(f"Could not resolve postcode {postcode} to a full address.")
+            return None
+    except Exception as e:
+        st.error(f"Error resolving postcode {postcode}: {str(e)}")
+        return None
+
+
+
+def geocode_addresses(addresses):
+    """
+    Geocodes a list of addresses or postcodes using OpenCage Geocoder.
+    """
+    # api_key = st.secrets["e760785d8c7944888beefc24aa42eb66"]
+    api_key = "e760785d8c7944888beefc24aa42eb66"  # Replace with your OpenCage API key
+    geocoder = OpenCageGeocode(api_key)
+    locations = []
+
+    for address in addresses:
+        if not address:  # Skip None or empty addresses
+            locations.append((None, None))
+            continue
+
+        try:
+            # If the address is a postcode (e.g., "S44 6JJ"), resolve it to a full address
+            if re.match(r'^[A-Za-z]{1,2}\d{1,2}[A-Za-z]?\s*\d[A-Za-z]{2}$', address.strip()):
+                full_address = resolve_postcode_to_address(address, api_key)
+                if not full_address:
+                    st.warning(f"Skipping postcode {address} (could not resolve to full address).")
+                    locations.append((None, None))
+                    continue
+            else:
+                full_address = f"{address}, Bolsover, UK"
+
+            # Geocode the full address
+            results = geocoder.geocode(full_address)
+
+            if results and len(results) > 0:
+                lat = results[0]['geometry']['lat']
+                lon = results[0]['geometry']['lng']
+                locations.append((lat, lon))
+                # st.write(f"Geocoded {full_address}: ({lat}, {lon})")  # Debug output
+            else:
+                st.warning(f"Geocoding failed for address: {full_address}")
+                locations.append((None, None))
+        except Exception as e:
+            st.error(f"Geocoding error for {address}: {str(e)}")
+            locations.append((None, None))
+
+    return locations
+
+# Function to create the clustered map using PyDeck
+def create_clustered_map(df, filter_by_sentiment=None, filter_by_issue=None, filter_by_topic=None):
+    # Apply filters
+    if filter_by_sentiment:
+        df = df[df["sentiment"] == filter_by_sentiment]
+    if filter_by_issue:
+        df = df[df["Issue"] == filter_by_issue]
+    if filter_by_topic:
+        df = df[df["Topic"] == filter_by_topic]
+
+    # Drop rows where geocoding failed
+    df = df.dropna(subset=['lat', 'lon'])
+
+    if df.empty:
+        st.error("No data found for the selected filters.")
+        return None
+
+    # Define color mapping for sentiment
+    color_mapping = {
+        "POSITIVE": [0, 0, 255, 160],  # Blue for positive
+        "NEGATIVE": [255, 0, 0, 160],   # Red for negative
+    }
+
+    # Create a ScatterplotLayer
+    layer = pdk.Layer(
+        "ScatterplotLayer",
+        df,
+        get_position=["lon", "lat"],
+        get_color="[color_mapping[sentiment][0], color_mapping[sentiment][1], color_mapping[sentiment][2], color_mapping[sentiment][3]]",
+        get_radius=100,  # Radius of the points
+        pickable=True,
+    )
+
+    # Set the viewport location
+    view_state = pdk.ViewState(
+        longitude=df["lon"].mean(),
+        latitude=df["lat"].mean(),
+        zoom=12,
+        pitch=0,  # No tilt for now
+        bearing=0,
+    )
+
+    # Create the PyDeck deck
+    deck = pdk.Deck(
+        layers=[layer],
+        initial_view_state=view_state,
+        map_style="mapbox://styles/mapbox/light-v10",
+        tooltip={
+            "html": "<b>Issue:</b> {Issue}<br><b>Sentiment:</b> {sentiment}<br><b>Topic:</b> {Topic}<br><b>Address:</b> {Address}<br><b>Text:</b> {text}",
+            "style": {
+                "backgroundColor": "steelblue",
+                "color": "white",
+            },
+        },
+    )
+
+    return deck
+
+
+# Function to extract addresses, issues, and topics from text
+def extract_addresses_issues_and_topics(text):
+    # Extract addresses using the existing UK address regex
+    addresses = re.findall(UK_ADDRESS_REGEX, text, flags=re.IGNORECASE)
+
+    # Extract issues using topic detection
+    issue, _ = compute_topic(text)  # Use the existing compute_topic function
+
+    # Extract topics
+    topic, _ = compute_topic(text)  # Use the existing compute_topic function
+    return addresses, issue, topic
+
+
+def extract_locations(text):
+    # Combined approach: NER + UK-specific regex patterns
+    locations = set()
+
+    # 1. Extract using NER model
+    ner_pipeline = get_ner_pipeline()
+    entities = ner_pipeline(text)
+    locations.update(entity['word'] for entity in entities if entity['entity'] in ['B-LOC', 'I-LOC'])
+
+    # 2. Find full addresses using regex
+    addresses = re.findall(UK_ADDRESS_REGEX, text, flags=re.IGNORECASE)
+    locations.update(addresses)
+
+    # 3. Extract postcodes separately
+    postcodes = re.findall(UK_POSTCODE_REGEX, text, flags=re.IGNORECASE)
+    locations.update(postcodes)
+
+    # Return the first valid address or postcode as a string
+    for loc in locations:
+        if re.match(UK_ADDRESS_REGEX, loc, flags=re.IGNORECASE) or re.match(UK_POSTCODE_REGEX, loc, flags=re.IGNORECASE):
+            return loc  # Return the first valid address or postcode
+
+    return None  # Return None if no valid address or postcode is found
+
+# ------------------ Updated Geocoding Function ------------------
+@st.cache_data
+def geocode_location(location_name):
+    geolocator = Nominatim(user_agent="bolsover_analysis")
+
+    # Try postcode first for better accuracy
+    postcode_match = re.search(UK_POSTCODE_REGEX, location_name, re.IGNORECASE)
+    if postcode_match:
+        try:
+            location = geolocator.geocode(postcode_match.group(0), exactly_one=True)
+            if location:
+                return (location.latitude, location.longitude)
+        except Exception as e:
+            print(f"Postcode geocoding error: {str(e)}")
+
+    # Fallback to full address
+    try:
+        location = geolocator.geocode(location_name + ", Bolsover District, UK", exactly_one=True)
+        if location:
+            return (location.latitude, location.longitude)
+    except Exception as e:
+        print(f"Address geocoding error: {str(e)}")
+
+    return (None, None)
+
+
+# Function to create the map
+def create_bolsover_map(df):
+    # Geocode addresses
+    df[['lat', 'lon']] = pd.DataFrame(geocode_addresses(df['Address']), columns=['lat', 'lon'])
+
+    # Drop rows where geocoding failed
+    df = df.dropna(subset=['lat', 'lon'])
+
+    # Create the map
+    fig = px.scatter_mapbox(
+        df,
+        lat="lat",
+        lon="lon",
+        color="Issue",  # Color by issue type
+        hover_name="Address",  # Show address on hover
+        hover_data=["text"],  # Show letter text on hover
+        zoom=12,  # Adjust zoom level for Bolsover
+        height=600,  # Map height
+        title="Geographical Distribution of Issues in Bolsover"
+    )
+
+    # Update map layout
+    fig.update_layout(
+        mapbox_style="open-street-map",  # Use OpenStreetMap style
+        margin={"r": 0, "t": 40, "l": 0, "b": 0},  # Adjust margins
+        legend=dict(
+            orientation="h",  # Horizontal legend
+            yanchor="bottom",
+            y=1.02,  # Position legend above the map
+            xanchor="right",
+            x=1
+        )
+    )
+
+    return fig
 
 
 # ------------------ Paraphrasing Function ------------------
@@ -181,6 +428,51 @@ def ai_question_answer(question, documents):
         return "I'm not entirely sure, but based on the documents: " + result['answer']
 
     return result['answer']
+
+
+# ------------------ Updated Data Processing ------------------
+def process_uploaded_data(_uploaded_files_texts):
+    df = pd.DataFrame({"text": _uploaded_files_texts})
+
+    # Existing processing
+    df["clean_text"] = df["text"].apply(comprehensive_text_preprocessing)
+    df["classification"] = df["clean_text"].apply(classify_document)
+    df["sentiment"] = df["text"].apply(lambda x: sentiment_analysis(x)["sentiment_label"])
+
+    # Enhanced location processing
+    df["locations"] = df["text"].apply(
+        lambda t: re.findall(UK_ADDRESS_REGEX, t, flags=re.IGNORECASE)
+    )
+    df["postcodes"] = df["text"].apply(
+        lambda t: re.findall(UK_POSTCODE_REGEX, t, flags=re.IGNORECASE)
+    )
+
+    # Combine addresses and postcodes
+    df["all_locations"] = df.apply(
+        lambda row: list(set(row["locations"] + row["postcodes"])),
+        axis=1
+    )
+
+    # Geocode all found locations
+    df["geocoded"] = df["all_locations"].apply(
+        lambda locs: [geocode_location(loc) for loc in locs if loc]
+    )
+
+    # Explode locations into individual rows
+    df = df.explode("geocoded").reset_index(drop=True)
+    df[["lat", "lon"]] = pd.DataFrame(
+        df["geocoded"].tolist(),
+        index=df.index
+    )
+
+    return df.dropna(subset=["lat", "lon"])
+
+
+
+def classify_document(text):
+    classifier = get_zero_shot_classifier()
+    result = classifier(text, ["Local Problem", "New Initiative"])
+    return result["labels"][0]
 
 
 # ------------------ Expanded Candidate Labels for Topic Detection ------------------
@@ -492,41 +784,23 @@ sentiment_pipeline = get_sentiment_pipeline()
 
 
 def sentiment_analysis(text):
-    # 1. VADER Analysis
-    sia = SentimentIntensityAnalyzer()
-    vader_scores = sia.polarity_scores(text)
-    vader_compound = vader_scores["compound"]
-
-    # 2. Transformer Analysis
+    # Transformer Analysis
     transformer_result = sentiment_pipeline(text)[0]
-    transformer_label = transformer_result["label"]  # "NEGATIVE" or "POSITIVE"
-    transformer_score = transformer_result["score"]
+
+    # Get highest confidence result
+    sentiment_label = max(transformer_result, key=lambda x: x['score'])['label'] # "NEGATIVE" or "POSITIVE"
+    confidence_score = max(transformer_result, key=lambda x: x['score'])['score']
 
     # Debug info is printed to console; remove or comment out if not needed.
-    print("VADER compound score:", vader_compound)
-    print("Transformer label:", transformer_label)
-    print("Transformer score:", transformer_score)
+    print("Transformer label:", sentiment_label)
+    print("Transformer score:", confidence_score)
 
-    # 3. Domain-specific override: if negative keywords are found, set sentiment to Negative.
-    negative_keywords = ["complaint", "disrupt", "noise", "excessive", "urge", "investigate", "strict", "control",
-                         "disturb"]
-    if any(keyword in text.lower() for keyword in negative_keywords):
-        final_sentiment = "Negative"
-    else:
-        if transformer_label == "NEGATIVE":
-            final_sentiment = "Negative"
-        elif transformer_label == "POSITIVE":
-            final_sentiment = "Positive"
-        else:
-            final_sentiment = "Neutral"
-        if vader_compound <= -0.3:
-            final_sentiment = "Negative"
+    # Generate explanation string
+    explanation = f"Classified as {sentiment_label} with {confidence_score:.0%} confidence"
 
-    explanation = f"The sentiment of the text is {final_sentiment}."
     return {
-        "vader_scores": vader_scores,
-        "transformer_result": transformer_result,
-        "sentiment_label": final_sentiment,
+        "sentiment_label": sentiment_label,
+        "confidence": confidence_score,
         "explanation": explanation
     }
 
@@ -544,35 +818,38 @@ def plot_sentiment_distribution(avg_sentiment):
     return fig
 
 
-def plot_sentiment_gauge(polarity):
+def plot_sentiment_gauge(confidence):
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
-        value=polarity,
+        value=confidence,
         domain={'x': [0, 1], 'y': [0, 1]},
-        title={"text": "Sentiment Gauge"},
+        title={"text": "Sentiment Confidence"},
         gauge={
-            "axis": {"range": [-1, 1]},
+            "axis": {"range": [0, 1]},
             "steps": [
-                {"range": [-1, -0.3], "color": "red"},
-                {"range": [-0.3, 0.3], "color": "yellow"},
-                {"range": [0.3, 1], "color": "green"}
+                {"range": [0, 0.3], "color": "red"},
+                {"range": [0.3, 0.7], "color": "yellow"},
+                {"range": [0.7, 1], "color": "green"}
             ],
             "threshold": {
                 "line": {"color": "black", "width": 4},
                 "thickness": 0.75,
-                "value": polarity
+                "value": confidence
             }
         }
     ))
-    # Add annotations for legend
     fig.update_layout(
         annotations=[
-            dict(x=0.15, y=0.1, text="<b>Negative</b>", showarrow=False, font=dict(color="red", size=12)),
-            dict(x=0.50, y=0.1, text="<b>Neutral</b>", showarrow=False, font=dict(color="yellow", size=12)),
-            dict(x=0.85, y=0.1, text="<b>Positive</b>", showarrow=False, font=dict(color="green", size=12))
+            dict(x=0.15, y=0.1, text="<b>Low</b>", showarrow=False,
+                 font=dict(color="red", size=12)),
+            dict(x=0.50, y=0.1, text="<b>Medium</b>", showarrow=False,
+                 font=dict(color="yellow", size=12)),
+            dict(x=0.85, y=0.1, text="<b>High</b>", showarrow=False,
+                 font=dict(color="green", size=12))
         ]
     )
     return fig
+
 
 
 # ------------------ Report Generation Functions ------------------
@@ -891,23 +1168,23 @@ def results_page():
         """, unsafe_allow_html=True)
 
     st.subheader("❓ Inquisitive Summary")
-    user_query = st.text_input("Query", "What actions are being urged in the letter?")
+    user_query = st.text_input("Ask anything about the letters:", "What actions are being urged in the letter?")
     query_res = query_based_summarization(letter_text, query=user_query)
     refined_query_res = paraphrase_text(query_res)
     st.write(personalize_summary(refined_query_res, "query"))
-
+    # sentiment_label confidence
     st.subheader("🗣️ Resident Mood Overview")
     sentiment_results = sentiment_analysis(letter_text)
-    vader_compound = sentiment_results["vader_scores"]["compound"]
     sentiment_label = sentiment_results["sentiment_label"]
-    explanation = sentiment_results["explanation"]
+    confidence_score = sentiment_results["confidence"]
+    explanation =  sentiment_results["explanation"]
 
     col_mood, col_gauge = st.columns(2)
     with col_mood:
         st.write(f"**Mood:** {sentiment_label}")
         st.write(explanation)
     with col_gauge:
-        gauge_fig = plot_sentiment_gauge(vader_compound)
+        gauge_fig = plot_sentiment_gauge(confidence_score)
         st.plotly_chart(gauge_fig)
 
     export_format = st.selectbox("Select Export Format", ["PDF", "DOCX", "TXT", "CSV"])
@@ -943,6 +1220,11 @@ def results_page():
         st.rerun()
 
 
+
+
+
+
+
 def aggregated_analysis_page():
     st.title("Comprehensive Letters Analysis")
 
@@ -973,12 +1255,34 @@ def aggregated_analysis_page():
     df_agg["clean_text"] = df_agg["text"].apply(comprehensive_text_preprocessing)
     texts_clean = df_agg["clean_text"].tolist()
 
-    # 4) Classification
-    labels, vectorizer, kmeans = unsupervised_classification(texts_clean, num_clusters=2)
-    cluster_mapping = dynamic_label_clusters(vectorizer, kmeans)
-    df_agg["classification"] = [cluster_mapping[label] for label in labels]
+    # 4) Extract addresses, issues, and topics from the text
+    df_agg["Address"] = df_agg["text"].apply(lambda x: extract_locations(x))
+    df_agg["Issue"], df_agg["Topic"] = zip(*df_agg["text"].apply(lambda x: compute_topic(x)))
+    df_agg["sentiment"] = df_agg["text"].apply(lambda x: sentiment_analysis(x)["sentiment_label"])
+    df_agg["classification"] = df_agg["clean_text"].apply(classify_document)
 
-    # 5) Calculate Key Metrics
+    # 5) Print the extracted data to the console
+    print("\nExtracted Data for Map Visualization:")
+    for index, row in df_agg.iterrows():
+        address = row["Address"] if row["Address"] else "No Address Extracted"
+        topic = row["Topic"] if row["Topic"] else "No Topic Extracted"
+        sentiment = row["sentiment"] if row["sentiment"] else "No Sentiment Extracted"
+        issue = row["Issue"] if row["Issue"] else "No Issue Extracted"
+        category = row["classification"] if row["classification"] else "No Category Extracted"
+
+        print(f"\nLetter {index + 1}:")
+        print(f"  - Address: {address}")
+        print(f"  - Topic: {topic}")
+        print(f"  - Sentiment: {sentiment}")
+        print(f"  - Issue: {issue}")
+        print(f"  - Category: {category}")
+
+    # 6) Geocode addresses
+    df_agg["Address"] = df_agg["text"].apply(lambda x: extract_locations(x))
+    lat_lon_list = geocode_addresses(df_agg["Address"].tolist())
+    df_agg[['lat', 'lon']] = pd.DataFrame(lat_lon_list, columns=['lat', 'lon'])
+
+    # 7) Calculate Key Metrics
     total_letters = len(df_agg)
     class_counts = df_agg["classification"].value_counts(normalize=True) * 100
     local_problems_pct = class_counts.get("Local Problem", 0)
@@ -1016,7 +1320,7 @@ def aggregated_analysis_page():
         </div>
         """, unsafe_allow_html=True)
 
-    # 6) Most Common Issues
+    # 8) Most Common Issues
     st.subheader("Most Common Issues")
 
     # Get topics and their keywords
@@ -1074,7 +1378,7 @@ def aggregated_analysis_page():
 
     st.plotly_chart(fig, use_container_width=True)
 
-    # 7) Classification & Sentiment Analysis
+    # 9) Classification & Sentiment Analysis
     st.subheader("📊 Classification Distribution & 😊 Sentiment Analysis")
     col4, col5 = st.columns(2)
 
@@ -1091,7 +1395,6 @@ def aggregated_analysis_page():
 
     with col5:
         # Sentiment Analysis
-        df_agg["sentiment"] = df_agg["text"].apply(lambda x: sentiment_analysis(x)["sentiment_label"])
         sentiment_counts = df_agg["sentiment"].value_counts()
         fig_sentiment = px.bar(
             sentiment_counts,
@@ -1102,7 +1405,7 @@ def aggregated_analysis_page():
         )
         st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # 8) Key Takeaways & Highlighted Sentences
+    # 10) Key Takeaways & Highlighted Sentences
     col6, col7 = st.columns(2)
 
     with col6:
@@ -1165,27 +1468,222 @@ def aggregated_analysis_page():
             except Exception as e:
                 st.error(f"Error processing question: {str(e)}")
 
+    # 11) Create the map with tabs
+    st.subheader("📍 Geographic Issue Distribution")
 
 
 
+    # Create tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["Show Map by Sentiment", "Show Map by Categories", "Show Map by Topics", "Show Map by Issues"])
 
+    with tab1:
+        st.write("### Map Filtered by Sentiment")
+        if df_agg.empty or df_agg["lat"].isnull().all() or df_agg["lon"].isnull().all():
+            st.warning("No geographic data available for mapping.")
+        else:
+            # Map for Sentiment
+            df_sentiment = df_agg.dropna(subset=["lat", "lon", "sentiment"])
+            if df_sentiment.empty:
+                st.warning("No data found for sentiment mapping.")
+            else:
+                # Color points based on sentiment
+                df_sentiment["color"] = df_sentiment["sentiment"].apply(
+                    lambda x: [0, 255, 0, 160] if x == "POSITIVE" else [255, 0, 0, 160])
 
+                # Calculate the bounding box of the data points
+                min_lat, max_lat = df_sentiment["lat"].min(), df_sentiment["lat"].max()
+                min_lon, max_lon = df_sentiment["lon"].min(), df_sentiment["lon"].max()
 
+                # Create PyDeck map
+                layer = pdk.Layer(
+                    "ScatterplotLayer",
+                    data=df_sentiment,
+                    get_position=["lon", "lat"],
+                    get_color="color",
+                    get_radius=200,
+                    pickable=True,
+                )
+                view_state = pdk.ViewState(
+                    latitude=(min_lat + max_lat) / 2,
+                    longitude=(min_lon + max_lon) / 2,
+                    zoom=10,
+                    min_zoom=5,
+                    max_zoom=15,
+                    pitch=0,
+                    bearing=0
+                )
+                deck = pdk.Deck(
+                    layers=[layer],
+                    initial_view_state=view_state,
+                    map_style="mapbox://styles/mapbox/light-v10" if st.get_option(
+                        "theme.base") == "light" else "mapbox://styles/mapbox/dark-v10",
+                    tooltip={"text": "Sentiment: {sentiment}\nAddress: {Address}"}
+                )
+                st.pydeck_chart(deck)
 
+    with tab2:
+        st.write("### Map Filtered by Categories")
+        if df_agg.empty or df_agg["lat"].isnull().all() or df_agg["lon"].isnull().all():
+            st.warning("No geographic data available for mapping.")
+        else:
+            # Map for Categories
+            df_category = df_agg.dropna(subset=["lat", "lon", "classification"])
+            if df_category.empty:
+                st.warning("No data found for category mapping.")
+            else:
+                # Assign unique colors to each category
+                unique_categories = df_category["classification"].unique()
+                base_colors = px.colors.qualitative.Plotly
+                if len(unique_categories) > len(base_colors):
+                    # If more categories than colors, cycle through the base colors
+                    color_map = {category: base_colors[i % len(base_colors)] for i, category in
+                                 enumerate(unique_categories)}
+                else:
+                    # Otherwise, use the base colors
+                    color_map = {category: base_colors[i] for i, category in enumerate(unique_categories)}
+                df_category["color"] = df_category["classification"].map(color_map)
 
+                # Calculate the bounding box of the data points
+                min_lat, max_lat = df_category["lat"].min(), df_category["lat"].max()
+                min_lon, max_lon = df_category["lon"].min(), df_category["lon"].max()
 
+                # Create PyDeck map
+                layer = pdk.Layer(
+                    "ScatterplotLayer",
+                    data=df_category,
+                    get_position=["lon", "lat"],
+                    get_color="color",
+                    get_radius=200,
+                    pickable=True,
+                )
+                view_state = pdk.ViewState(
+                    latitude=(min_lat + max_lat) / 2,
+                    longitude=(min_lon + max_lon) / 2,
+                    zoom=10,
+                    min_zoom=5,
+                    max_zoom=15,
+                    pitch=0,
+                    bearing=0
+                )
+                deck = pdk.Deck(
+                    layers=[layer],
+                    initial_view_state=view_state,
+                    map_style="mapbox://styles/mapbox/light-v10" if st.get_option(
+                        "theme.base") == "light" else "mapbox://styles/mapbox/dark-v10",
+                    tooltip={"text": "Category: {classification}\nAddress: {Address}"}
+                )
+                st.pydeck_chart(deck)
 
+    with tab3:
+        st.write("### Map Filtered by Topics")
+        if df_agg.empty or df_agg["lat"].isnull().all() or df_agg["lon"].isnull().all():
+            st.warning("No geographic data available for mapping.")
+        else:
+            # Map for Topics
+            df_topic = df_agg.dropna(subset=["lat", "lon", "Topic"])
+            if df_topic.empty:
+                st.warning("No data found for topic mapping.")
+            else:
+                # Assign unique colors to each topic
+                unique_topics = df_topic["Topic"].unique()
+                base_colors = px.colors.qualitative.Plotly
+                if len(unique_topics) > len(base_colors):
+                    # If more topics than colors, cycle through the base colors
+                    color_map = {topic: base_colors[i % len(base_colors)] for i, topic in enumerate(unique_topics)}
+                else:
+                    # Otherwise, use the base colors
+                    color_map = {topic: base_colors[i] for i, topic in enumerate(unique_topics)}
+                df_topic["color"] = df_topic["Topic"].map(color_map)
 
+                # Calculate the bounding box of the data points
+                min_lat, max_lat = df_topic["lat"].min(), df_topic["lat"].max()
+                min_lon, max_lon = df_topic["lon"].min(), df_topic["lon"].max()
 
+                # Create PyDeck map
+                layer = pdk.Layer(
+                    "ScatterplotLayer",
+                    data=df_topic,
+                    get_position=["lon", "lat"],
+                    get_color="color",
+                    get_radius=200,
+                    pickable=True,
+                )
+                view_state = pdk.ViewState(
+                    latitude=(min_lat + max_lat) / 2,
+                    longitude=(min_lon + max_lon) / 2,
+                    zoom=10,
+                    min_zoom=5,
+                    max_zoom=15,
+                    pitch=0,
+                    bearing=0
+                )
+                deck = pdk.Deck(
+                    layers=[layer],
+                    initial_view_state=view_state,
+                    map_style="mapbox://styles/mapbox/light-v10" if st.get_option(
+                        "theme.base") == "light" else "mapbox://styles/mapbox/dark-v10",
+                    tooltip={"text": "Topic: {Topic}\nAddress: {Address}"}
+                )
+                st.pydeck_chart(deck)
 
+    with tab4:
+        st.write("### Map Filtered by Issues")
+        if df_agg.empty or df_agg["lat"].isnull().all() or df_agg["lon"].isnull().all():
+            st.warning("No geographic data available for mapping.")
+        else:
+            # Map for Issues
+            df_issue = df_agg.dropna(subset=["lat", "lon", "Issue"])
+            if df_issue.empty:
+                st.warning("No data found for issue mapping.")
+            else:
+                # Assign unique colors to each issue
+                unique_issues = df_issue["Issue"].unique()
+                base_colors = px.colors.qualitative.Plotly
+                if len(unique_issues) > len(base_colors):
+                    # If more issues than colors, cycle through the base colors
+                    color_map = {issue: base_colors[i % len(base_colors)] for i, issue in enumerate(unique_issues)}
+                else:
+                    # Otherwise, use the base colors
+                    color_map = {issue: base_colors[i] for i, issue in enumerate(unique_issues)}
+                df_issue["color"] = df_issue["Issue"].map(color_map)
 
+                # Calculate the bounding box of the data points
+                min_lat, max_lat = df_issue["lat"].min(), df_issue["lat"].max()
+                min_lon, max_lon = df_issue["lon"].min(), df_issue["lon"].max()
 
-    # 9) Export options
+                # Create PyDeck map
+                layer = pdk.Layer(
+                    "ScatterplotLayer",
+                    data=df_issue,
+                    get_position=["lon", "lat"],
+                    get_color="color",
+                    get_radius=200,
+                    pickable=True,
+                )
+                view_state = pdk.ViewState(
+                    latitude=(min_lat + max_lat) / 2,
+                    longitude=(min_lon + max_lon) / 2,
+                    zoom=10,
+                    min_zoom=5,
+                    max_zoom=15,
+                    pitch=0,
+                    bearing=0
+                )
+                deck = pdk.Deck(
+                    layers=[layer],
+                    initial_view_state=view_state,
+                    map_style="mapbox://styles/mapbox/light-v10" if st.get_option(
+                        "theme.base") == "light" else "mapbox://styles/mapbox/dark-v10",
+                    tooltip={"text": "Issue: {Issue}\nAddress: {Address}"}
+                )
+                st.pydeck_chart(deck)
+
+    # 12) Export options
     st.subheader("Export Options")
     report_csv = df_agg.to_csv(index=False)
     st.download_button("Download Report (CSV)", report_csv, file_name="aggregated_report.csv", mime="text/csv")
 
-    # # 10) Navigation
+    # 13) Navigation
     if st.button("Back to Data Entry"):
         st.session_state.input_text = ""
         st.session_state.data_submitted = False
