@@ -1,5 +1,5 @@
 # Core Dependencies
-python>=3.8,<3.11
+python>=3.8
 
 # File Handling..
 PyPDF2==3.0.1
