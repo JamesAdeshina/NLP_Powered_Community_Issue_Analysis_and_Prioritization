@@ -1,0 +1,32 @@
+# Core Dependencies
+python>=3.8,<3.11
+
+# File Handling
+PyPDF2==3.0.1
+python-docx==0.8.11
+
+# Data Processing
+pandas==2.0.3
+numpy==1.24.4
+
+# NLP Core
+nltk==3.8.1
+emoji==2.10.0
+contractions==0.1.73
+
+# ML/Text Processing
+scikit-learn==1.3.2
+torch==2.1.1
+
+# Summarization
+sumy==0.11.0
+rake-nltk==1.0.4
+
+# Transformers
+transformers==4.36.2
+sentence-transformers==2.2.2
+
+# Geospatial
+geopy==2.4.1
+opencage==1.2.2
+pydeck==0.8.1b0
