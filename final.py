@@ -73,8 +73,12 @@ else:
 # ------------------ Caching Model Loading ------------------
 @st.cache_resource
 def get_zero_shot_classifier():
-    return hf_pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-
+    return pipeline(
+        "zero-shot-classification",
+        model="facebook/bart-large-mnli",
+        tokenizer="facebook/bart-large-mnli",  # Explicit tokenizer specification
+        framework="pt"  # Specify PyTorch
+    )
 
 @st.cache_resource
 def get_abstractive_summarizer():
