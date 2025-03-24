@@ -65,10 +65,22 @@ else:
 
 # ------------------ NLTK Downloads ------------------
 # (Assuming these have been downloaded already)
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('vader_lexicon')
+# Initialize NLTK with Streamlit Cloud compatibility
+def initialize_nltk():
+    if 'nltk_initialized' not in st.session_state:
+        try:
+            nltk.data.find('tokenizers/punkt')
+        except LookupError:
+            nltk.download('punkt', quiet=True)
+            nltk.download('stopwords', quiet=True)
+            nltk.download('wordnet', quiet=True)
+            nltk.download('vader_lexicon', quiet=True)
+            nltk.download('averaged_perceptron_tagger', quiet=True)
+            nltk.download('omw-1.4', quiet=True)
+        st.session_state.nltk_initialized = True
+
+# Must be called before any NLTK processing
+initialize_nltki()
 
 # ------------------ Caching Model Loading ------------------
 @st.cache_resource
@@ -667,9 +679,16 @@ def remove_extra_whitespace(text):
 
 
 def tokenize_and_lower(text):
-    tokens = word_tokenize(text)
-    return [token.lower() for token in tokens]
+    # Handle empty/null inputs
+    if not text or not isinstance(text, str):
+        return []
 
+    # Add error recovery
+    try:
+        return [word.lower() for word in word_tokenize(text)]
+    except:
+        # Fallback to simple splitting
+        return text.lower().split()
 
 def remove_stopwords(tokens):
     stop_words = set(stopwords.words('english'))
