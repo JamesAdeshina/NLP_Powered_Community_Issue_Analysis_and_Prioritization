@@ -78,20 +78,24 @@ def get_zero_shot_classifier():
 
 @st.cache_resource
 def get_abstractive_summarizer():
-    return hf_pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
-
+    return pipeline(
+        "summarization",
+        model="sshleifer/distilbart-cnn-12-6",
+        revision="a4f8f3e"
+    )
 
 @st.cache_resource
 def get_sentiment_pipeline():
-    return hf_pipeline(
+    return pipeline(
         "sentiment-analysis",
         model="distilbert-base-uncased-finetuned-sst-2-english",
         return_all_scores=True
     )
 
+
 @st.cache_resource
 def get_qa_pipeline():
-    return hf_pipeline(
+    return pipeline(
         "question-answering",
         model="deepset/roberta-base-squad2",
         tokenizer="deepset/roberta-base-squad2"
