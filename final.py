@@ -65,6 +65,10 @@ else:
 
 # ------------------ NLTK Downloads ------------------
 # (Assuming these have been downloaded already)
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('vader_lexicon')
 # Initialize NLTK with Streamlit Cloud compatibility
 def initialize_nltk():
     if 'nltk_initialized' not in st.session_state:
