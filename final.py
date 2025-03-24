@@ -80,7 +80,7 @@ def initialize_nltk():
         st.session_state.nltk_initialized = True
 
 # Must be called before any NLTK processing
-initialize_nltki()
+initialize_nltk()
 
 # ------------------ Caching Model Loading ------------------
 @st.cache_resource
