@@ -62,6 +62,12 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
+# MUST BE FIRST STREAMLIT COMMAND
+st.set_page_config(
+    layout="wide",
+    page_title="Bolsover District Council - Analysis",
+    page_icon="🏛️"
+)
 
 # ------------------ NLTK Downloads ------------------
 # (Assuming these have been downloaded already)
@@ -109,7 +115,7 @@ def get_sentiment_pipeline():
     return pipeline(
         "sentiment-analysis",
         model="distilbert-base-uncased-finetuned-sst-2-english",
-        return_all_scores=True
+        top_k=None
     )
 
 
@@ -1724,7 +1730,7 @@ def aggregated_analysis_page():
 
 
 def main():
-    st.set_page_config(layout="wide", page_title="Bolsover District Council - Analysis")
+    # st.set_page_config(layout="wide", page_title="Bolsover District Council - Analysis")
     st.sidebar.image("src/img/Bolsover_District_Council_logo.svg", width=150)
 
     # Only if data has been submitted in Upload File mode, show dynamic icon and original letter expander
