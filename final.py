@@ -65,10 +65,10 @@ else:
 
 # ------------------ NLTK Downloads ------------------
 # (Assuming these have been downloaded already)
-# nltk.download('punkt')
-# nltk.download('stopwords')
-# nltk.download('wordnet')
-# nltk.download('vader_lexicon')
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('vader_lexicon')
 
 # ------------------ Caching Model Loading ------------------
 @st.cache_resource
