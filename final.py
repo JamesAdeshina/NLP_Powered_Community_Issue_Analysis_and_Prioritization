@@ -1009,7 +1009,7 @@ def data_entry_page():
     uploaded_files = []
 
     if data_mode == "Paste Text":
-        input_text = st.text_area("Paste your letter text here", height=200)
+        input_text = st.text_area("📝Paste letter text here...", height=200)
     else:
         uploaded_files = st.file_uploader(
             "Upload files (txt, pdf, doc, docx)",
