@@ -2,18 +2,55 @@ from models.load_models import get_sentiment_pipeline
 
 
 def sentiment_analysis(text):
-    sentiment_pipeline = get_sentiment_pipeline()
-    transformer_result = sentiment_pipeline(text)[0]
+    try:
+        # Get logger from session state
+        logger = st.session_state.get('logger')
 
-    sentiment_label = max(transformer_result, key=lambda x: x['score'])['label']
-    confidence_score = max(transformer_result, key=lambda x: x['score'])['score']
+        if not text or not isinstance(text, str) or not text.strip():
+            error_msg = "Empty text provided for sentiment analysis"
+            if logger:
+                logger.warning(error_msg)
+            return {
+                "sentiment_label": "NEUTRAL",
+                "confidence": 0.5,
+                "explanation": error_msg,
+                "status": "warning"
+            }
 
-    confidence = f"Classified as {sentiment_label} with {confidence_score:.0%} confidence"
-    explanation = f"Classified as {sentiment_label} with {confidence_score:.0%} confidence"
+        sentiment_pipeline = get_sentiment_pipeline()
+        transformer_result = sentiment_pipeline(text)[0]
 
-    return {
-        "Sentiment_label": sentiment_label,
-        "Confidence score": confidence_score,
-        "Confidence": confidence_score,
-        "Explanation": explanation
-    }
+        if not transformer_result:
+            error_msg = "Sentiment analysis returned no results"
+            if logger:
+                logger.error(error_msg)
+            return {
+                "sentiment_label": "NEUTRAL",
+                "confidence": 0.5,
+                "explanation": error_msg,
+                "status": "error"
+            }
+
+        best_result = max(transformer_result, key=lambda x: x['score'])
+
+        if logger:
+            logger.info(
+                f"Successfully analyzed sentiment: {best_result['label']} (confidence: {best_result['score']:.2f})")
+
+        return {
+            "sentiment_label": best_result['label'].upper(),
+            "confidence": best_result['score'],
+            "explanation": f"Classified as {best_result['label']} with {best_result['score']:.0%} confidence",
+            "status": "success"
+        }
+
+    except Exception as e:
+        error_msg = f"Sentiment analysis failed: {str(e)}"
+        if logger:
+            logger.error(error_msg, exc_info=True)
+        return {
+            "sentiment_label": "NEUTRAL",
+            "confidence": 0.5,
+            "explanation": error_msg,
+            "status": "error"
+        }

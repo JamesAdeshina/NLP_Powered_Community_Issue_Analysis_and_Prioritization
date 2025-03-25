@@ -1,5 +1,7 @@
 # Standard configuration and constants
 import os
+import ssl  # Added missing import
+import nltk
 
 # SSL Context for NLTK Downloads
 try:

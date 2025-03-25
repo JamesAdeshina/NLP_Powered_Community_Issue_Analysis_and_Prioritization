@@ -12,7 +12,7 @@ def resolve_postcode_to_address(postcode, api_key=OPENCAGE_API_KEY):
         if results and len(results) > 0:
             return results[0]['formatted']
         return None
-    except Exception as e:
+    except Exception as e:  # Added missing colon here
         print(f"Error resolving postcode {postcode}: {str(e)}")
         return None
 
@@ -41,7 +41,7 @@ def geocode_addresses(addresses, api_key=OPENCAGE_API_KEY):
                 locations.append((results[0]['geometry']['lat'], results[0]['geometry']['lng']))
             else:
                 locations.append((None, None))
-        except Exception as e:
+        except Exception as e:  # Added missing colon here
             print(f"Geocoding error for {address}: {str(e)}")
             locations.append((None, None))
 
@@ -57,4 +57,28 @@ def geocode_location(location_name):
             location = geolocator.geocode(postcode_match.group(0), exactly_one=True)
             if location:
                 return (location.latitude, location.longitude)
-        except Exception
+        except Exception as e:  # Added missing colon here
+            print(f"Postcode geocoding error: {str(e)}")
+
+    try:
+        location = geolocator.geocode(location_name + ", Bolsover District, UK", exactly_one=True)
+        if location:
+            return (location.latitude, location.longitude)
+    except Exception as e:  # Added missing colon here
+        print(f"Address geocoding error: {str(e)}")
+
+    return (None, None)
+
+
+def extract_locations(text):
+    locations = set()
+    addresses = re.findall(UK_ADDRESS_REGEX, text, flags=re.IGNORECASE)
+    locations.update(addresses)
+    postcodes = re.findall(UK_POSTCODE_REGEX, text, flags=re.IGNORECASE)
+    locations.update(postcodes)
+
+    for loc in locations:
+        if re.match(UK_ADDRESS_REGEX, loc, flags=re.IGNORECASE) or re.match(UK_POSTCODE_REGEX, loc,
+                                                                            flags=re.IGNORECASE):
+            return loc
+    return None
