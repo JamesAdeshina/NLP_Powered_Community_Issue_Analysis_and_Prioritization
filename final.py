@@ -1258,10 +1258,6 @@ def results_page():
 
 
 
-
-
-
-
 def aggregated_analysis_page():
     st.title("Comprehensive Letters Analysis")
 
