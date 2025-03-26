@@ -1,20 +1,47 @@
+import re
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 from processing.data_processing import process_uploaded_data
 from models.summarization import get_summaries
+from processing.topics import topic_modeling, dynamic_topic_label
 from ui.components.sidebar import show_sidebar
 from ui.components.cards import kpi_card, summary_card
 from ui.components.maps import create_sentiment_map
+from config import PAGE_CONFIG, CLASSIFICATION_LABELS, CANDIDATE_LABELS_TOPIC
+from utils.preprocessing import comprehensive_text_preprocessing, extract_locations
+from models.classification import classify_document
+from models.sentiment import sentiment_analysis
+from utils.geocoding import geocode_addresses
+import ssl
+
+
+def create_issues_dataframe(df):
+    """Create dataframe of issues from topic modeling results"""
+    topics = topic_modeling(df["clean_text"].tolist(), num_topics=3)
+    issues_data = []
+
+    for topic in topics:
+        keywords = [re.escape(kw.strip()) for kw in topic.split(',')]
+        pattern = r'\b(' + '|'.join(keywords) + r')\b'
+        count = df['clean_text'].str.contains(pattern, regex=True, case=False, na=False).sum()
+
+        issues_data.append({
+            "Issue": dynamic_topic_label(topic),
+            "Count": count,
+            "Percentage": (count / len(df) * 100)
+        })
+
+    return pd.DataFrame(issues_data).sort_values('Count', ascending=False)
 
 
 def aggregated_analysis_page():
     st.title("Comprehensive Letters Analysis")
 
+    # 1. Validate session state and inputs
     if not st.session_state.get("data_submitted", False):
         st.warning("No data submitted yet. Please go to the 'Data Entry' page.")
         return
-
     if "uploaded_files_texts" not in st.session_state or len(st.session_state.uploaded_files_texts) < 2:
         st.warning("No multiple-file data found. Please upload multiple files.")
         return
@@ -24,6 +51,7 @@ def aggregated_analysis_page():
 
     # Process data
     df_agg = process_uploaded_data(st.session_state.uploaded_files_texts)
+    st.write("Processed Data:", df_agg)
 
     # Key Metrics
     st.markdown("### Key Metrics")
@@ -52,9 +80,9 @@ def aggregated_analysis_page():
         color="Issue"
     )
     fig.update_traces(
-        texttemplate='%{text}%',
+        texttemplate='%{text:.1f}%',
         textposition='outside',
-        hovertemplate="<b>%{x}</b><br>Count: %{y}<br>Percentage: %{text}%"
+        hovertemplate="<b>%{x}</b><br>Count: %{y}<br>Percentage: %{text:.1f}%"
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -63,27 +91,36 @@ def aggregated_analysis_page():
     col4, col5 = st.columns(2)
 
     with col4:
+        classification_counts = df_agg["classification"].value_counts().reset_index()
+        classification_counts.columns = ['classification', 'count']
         fig_classification = px.pie(
-            df_agg["classification"].value_counts(),
-            values=df_agg["classification"].value_counts().values,
-            names=df_agg["classification"].value_counts().index,
+            classification_counts,
+            values='count',
+            names='classification',
             title="Classification Distribution"
         )
         st.plotly_chart(fig_classification, use_container_width=True)
 
     with col5:
+        sentiment_counts = df_agg["sentiment"].value_counts().reset_index()
+        sentiment_counts.columns = ['sentiment', 'count']
         fig_sentiment = px.bar(
-            df_agg["sentiment"].value_counts(),
-            x=df_agg["sentiment"].value_counts().index,
-            y=df_agg["sentiment"].value_counts().values,
+            sentiment_counts,
+            x='sentiment',
+            y='count',
             title="Sentiment Analysis",
-            color=df_agg["sentiment"].value_counts().index
+            color='sentiment',
+            color_discrete_map={
+                'Positive': 'green',
+                'Neutral': 'gray',
+                'Negative': 'red'
+            },
+            labels={'count': 'Number of Letters', 'sentiment': 'Sentiment'}
         )
         st.plotly_chart(fig_sentiment, use_container_width=True)
 
     # Key Takeaways & Highlighted Sentences
     col6, col7 = st.columns(2)
-
     with col6:
         st.subheader("💡 Key Takeaways")
         key_takeaways = " ".join([
@@ -106,7 +143,6 @@ def aggregated_analysis_page():
         "Ask anything about the letters:",
         placeholder="e.g. What are the main complaints about waste management?"
     )
-
     if user_question:
         with st.spinner("Analyzing documents..."):
             response = ai_question_answer(
@@ -148,21 +184,3 @@ def aggregated_analysis_page():
         st.session_state.data_submitted = False
         st.session_state.page = "data_entry"
         st.rerun()
-
-
-def create_issues_dataframe(df):
-    topics = topic_modeling(df["clean_text"].tolist(), num_topics=3)
-    issues_data = []
-
-    for topic in topics:
-        keywords = [re.escape(kw.strip()) for kw in topic.split(',')]
-        pattern = r'\b(' + '|'.join(keywords) + r')\b'
-        count = df['clean_text'].str.contains(pattern, regex=True, case=False, na=False).sum()
-
-        issues_data.append({
-            "Issue": dynamic_topic_label(topic),
-            "Count": count,
-            "Percentage": (count / len(df) * 100)
-        })
-
-    return pd.DataFrame(issues_data).sort_values('Count', ascending=False)

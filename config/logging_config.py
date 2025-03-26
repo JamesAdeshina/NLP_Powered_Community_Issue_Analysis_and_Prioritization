@@ -1,9 +1,11 @@
+# config/logging_config.py
 import logging
 import os
 from datetime import datetime
 
 
-def setup_logging():
+def setup_logger(name=__name__):
+    """Configure and return a logger instance"""
     # Create logs directory if it doesn't exist
     logs_dir = "logs"
     os.makedirs(logs_dir, exist_ok=True)
@@ -21,4 +23,10 @@ def setup_logging():
         ]
     )
 
-    return logging.getLogger(__name__)
+    return logging.getLogger(name)
+
+
+# Test the function works when run directly
+if __name__ == "__main__":
+    test_logger = setup_logger()
+    test_logger.info("Logger test successful")

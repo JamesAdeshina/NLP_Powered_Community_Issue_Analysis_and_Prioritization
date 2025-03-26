@@ -1,6 +1,7 @@
 from models.load_models import get_abstractive_summarizer
 from utils.nlp_utils import extractive_summarization, query_based_summarization
 
+
 def abstractive_summarization(text):
     summarizer = get_abstractive_summarizer()
     summary = summarizer(text, max_length=50, min_length=25, do_sample=False)

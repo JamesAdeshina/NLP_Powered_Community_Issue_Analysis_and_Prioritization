@@ -8,6 +8,12 @@ from ui.components.cards import summary_card
 from ui.components.reports import get_export_options
 from utils.visualization import plot_sentiment_gauge
 from utils.nlp_utils import query_based_summarization, personalize_summary  # Added missing imports
+from config import CLASSIFICATION_LABELS  # For classify_document
+
+
+
+
+
 
 
 def results_page():

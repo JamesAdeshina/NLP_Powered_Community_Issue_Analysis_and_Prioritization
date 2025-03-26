@@ -1,7 +1,9 @@
-import PyPDF2
-from docx import Document
-import pandas as pd
 import io
+import PyPDF2
+import pandas as pd
+from fpdf import FPDF
+from docx import Document
+from config import UK_POSTCODE_REGEX  # Only if needed
 
 
 def extract_text_from_file(file):

@@ -1,27 +1,3 @@
-# Standard configuration and constants
-import os
-import ssl  # Added missing import
-import nltk
-
-# SSL Context for NLTK Downloads
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
-
-# Page configuration
-PAGE_CONFIG = {
-    "layout": "wide",
-    "page_title": "Bolsover District Council - Analysis",
-    "page_icon": "🏛️"
-}
-
-# UK address patterns
-UK_POSTCODE_REGEX = r'\b[A-Z]{1,2}\d{1,2}[A-Z]?\s\d[A-Z]{2}\b'
-UK_ADDRESS_REGEX = r'\b\d+\s[\w\s]+\b,\s[\w\s]+,\s' + UK_POSTCODE_REGEX
-
 # Topic candidate labels
 # ------------------ Expanded Candidate Labels for Topic Detection ------------------
 CANDIDATE_LABELS_TOPIC: tuple[str, ...] = (
@@ -131,20 +107,3 @@ CANDIDATE_LABELS_TOPIC: tuple[str, ...] = (
     "Data Privacy Concerns",
     "Sustainable Fashion"
 )
-
-# Classification labels
-CLASSIFICATION_LABELS = ["Local Problem", "New Initiatives"]
-
-
-# API Keys (should be moved to secrets in production)
-OPENCAGE_API_KEY = "e760785d8c7944888beefc24aa42eb66"
-
-# NLTK resources
-NLTK_RESOURCES = [
-    'punkt',
-    'stopwords',
-    'wordnet',
-    'vader_lexicon',
-    'averaged_perceptron_tagger',
-    'omw-1.4'
-]

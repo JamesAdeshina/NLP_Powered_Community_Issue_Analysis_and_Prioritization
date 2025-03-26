@@ -1,6 +1,8 @@
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+import pydeck as pdk
+
 
 def plot_classification_distribution(class_counts):
     fig = go.Figure([go.Bar(x=class_counts.index, y=class_counts.values)])

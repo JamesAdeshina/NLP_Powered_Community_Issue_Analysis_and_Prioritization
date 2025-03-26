@@ -1,10 +1,12 @@
 import streamlit as st
 from utils.file_utils import extract_text_from_file
 from utils.preprocessing import comprehensive_text_preprocessing
+from config import PAGE_CONFIG
+
 
 def data_entry_page():
     st.title("Letter Submission (Data Entry)")
-    data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"])
+    data_mode = st.radio("Choose Input Mode", ["Paste Text", "Upload File"], index=1)  # Default to Upload
 
     input_text = ""
     uploaded_files = []
@@ -15,55 +17,60 @@ def data_entry_page():
         uploaded_files = st.file_uploader(
             "Upload files (txt, pdf, doc, docx)",
             type=["txt", "pdf", "doc", "docx"],
-            accept_multiple_files=True
+            accept_multiple_files=True,
+            key="file_uploader"  # Add key for better session state management
         )
 
     if st.button("Submit"):
         with st.spinner("Processing..."):
+            # Reset relevant session state variables
+            st.session_state.clear()
+            st.session_state.data_mode = data_mode
+
             if data_mode == "Paste Text":
                 if not input_text.strip():
                     st.warning("Please paste some text before submitting.")
                     return
 
-                st.session_state.input_text = input_text
+                # Store single text as a list for consistency
+                st.session_state.uploaded_files_texts = [input_text.strip()]
+                st.session_state.input_text = input_text.strip()
                 st.session_state.data_submitted = True
-                st.session_state.data_mode = data_mode
-                st.session_state.uploaded_file_info = {
-                    "num_files": 1,
-                    "file_extensions": {"paste"}
-                }
                 st.session_state.page = "results"
-                st.rerun()
 
-            elif data_mode == "Upload File":
+            else:  # Upload File mode
                 if not uploaded_files:
                     st.warning("Please upload at least one file.")
                     return
 
-                file_types = []
                 extracted_texts = []
-                combined_text = ""
+                valid_files = 0
 
                 for file in uploaded_files:
-                    text = extract_text_from_file(file)
-                    if text:
-                        extracted_texts.append(text.strip())
-                        combined_text += f"\n\n{text.strip()}"
+                    try:
+                        text = extract_text_from_file(file)
+                        if text and text.strip():
+                            extracted_texts.append(text.strip())
+                            valid_files += 1
+                    except Exception as e:
+                        st.error(f"Error processing {file.name}: {str(e)}")
+                        continue
 
                 if not extracted_texts:
-                    st.error("Could not extract any text from uploaded files")
+                    st.error("No valid text content found in any uploaded files")
                     return
 
-                # Update session state
+                # Store all processing results
                 st.session_state.uploaded_files_texts = extracted_texts
-                st.session_state.input_text = combined_text.strip()
+                st.session_state.input_text = "\n\n".join(extracted_texts)
                 st.session_state.data_submitted = True
-                st.session_state.data_mode = data_mode
+                st.session_state.uploaded_file_info = {
+                    "num_files": valid_files,
+                    "file_names": [f.name for f in uploaded_files],
+                    "file_types": [f.type for f in uploaded_files]
+                }
 
-                # Route to correct page
-                if len(uploaded_files) > 1:
-                    st.session_state.page = "aggregated_analysis"
-                else:
-                    st.session_state.page = "results"
+                # Route to appropriate page
+                st.session_state.page = "aggregated_analysis" if valid_files > 1 else "results"
 
-                st.rerun()
+            st.rerun()

@@ -2,8 +2,14 @@ import re
 from geopy.geocoders import Nominatim
 from opencage.geocoder import OpenCageGeocode
 import pandas as pd
-from config import UK_POSTCODE_REGEX, UK_ADDRESS_REGEX, OPENCAGE_API_KEY
+# from config import UK_POSTCODE_REGEX, UK_ADDRESS_REGEX, OPENCAGE_API_KEY
+# from config.settings import UK_POSTCODE_REGEX, UK_ADDRESS_REGEX, OPENCAGE_API_KEY
 
+from config import (
+    UK_POSTCODE_REGEX,
+    UK_ADDRESS_REGEX,
+    OPENCAGE_API_KEY
+)
 
 def resolve_postcode_to_address(postcode, api_key=OPENCAGE_API_KEY):
     geocoder = OpenCageGeocode(api_key)

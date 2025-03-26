@@ -6,21 +6,11 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-def remove_email_headers_and_footers(text: str) -> str:
-    lines = text.split('\n')
-    stripped_lines = [line.strip() for line in lines]
-    if "" in stripped_lines:
-        first_blank_index = stripped_lines.index("")
-        content = "\n".join(lines[first_blank_index + 1:]).strip()
-    else:
-        content = text
-    signature_markers = ('sincerely,', 'regards,', 'best regards,', 'thanks,', 'thank you,')
-    final_lines = []
-    for line in content.split('\n'):
-        if any(line.lower().startswith(marker) for marker in signature_markers):
-            break
-        final_lines.append(line)
-    return "\n".join(final_lines).strip()
+
+
+
+
+
 
 def remove_emojis(text):
     return emoji.replace_emoji(text, replace="")
@@ -78,3 +68,23 @@ def comprehensive_text_preprocessing(text, use_lemmatization=True):
     if use_lemmatization:
         tokens = lemmatize_tokens(tokens)
     return ' '.join(tokens)
+
+
+def extract_locations(text):
+    """
+    Extract potential locations from text using simple pattern matching
+    """
+    # UK postcode pattern (simplified)
+    postcode_pattern = r'[A-Z]{1,2}[0-9][A-Z0-9]? [0-9][A-Z]{2}'
+    # Common address patterns
+    address_pattern = r'\d+\s+[\w\s]+(?:street|road|avenue|lane|drive|way|close|circus)\b'
+
+    postcodes = re.findall(postcode_pattern, text, re.IGNORECASE)
+    addresses = re.findall(address_pattern, text, re.IGNORECASE)
+
+    # Return the first found location or empty string
+    if postcodes:
+        return postcodes[0]
+    elif addresses:
+        return addresses[0]
+    return ""

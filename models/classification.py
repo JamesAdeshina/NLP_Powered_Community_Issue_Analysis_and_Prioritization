@@ -1,5 +1,5 @@
-from models.load_models import get_zero_shot_classifier
 from config import CLASSIFICATION_LABELS
+from models.load_models import get_zero_shot_classifier
 
 
 def classify_document(text):

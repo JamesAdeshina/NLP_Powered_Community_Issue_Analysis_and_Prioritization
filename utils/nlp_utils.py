@@ -1,4 +1,6 @@
 import re
+import streamlit as st
+import config
 import nltk
 from nltk.tokenize import sent_tokenize
 from sumy.parsers.plaintext import PlaintextParser
@@ -6,8 +8,7 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lex_rank import LexRankSummarizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
-import streamlit as st
-import config
+from config import NLTK_RESOURCES  # If using initialize_nltk()
 
 
 def initialize_nltk():
