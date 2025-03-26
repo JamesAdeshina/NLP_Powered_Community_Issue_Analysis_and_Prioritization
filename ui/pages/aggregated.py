@@ -119,24 +119,6 @@ def aggregated_analysis_page():
         )
         st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # Key Takeaways & Highlighted Sentences
-    col6, col7 = st.columns(2)
-    with col6:
-        st.subheader("💡 Key Takeaways")
-        key_takeaways = " ".join([
-            get_summaries(text)["abstractive"]
-            for text in st.session_state.uploaded_files_texts[:3]
-        ])
-        summary_card("Combined Abstracts", key_takeaways[:500])
-
-    with col7:
-        st.subheader("🔍 Highlighted Sentences")
-        highlighted = " ".join([
-            get_summaries(text)["extractive"]
-            for text in st.session_state.uploaded_files_texts[:3]
-        ])
-        summary_card("Key Extracts", highlighted[:500])
-
     # AI Search Section
     st.subheader("🔍 AI Document Analyst")
     user_question = st.text_input(
