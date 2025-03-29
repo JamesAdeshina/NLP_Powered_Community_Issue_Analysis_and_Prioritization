@@ -6,8 +6,8 @@ from processing.data_processing import process_uploaded_data
 from models.summarization import get_summaries
 from processing.topics import topic_modeling, dynamic_topic_label
 from ui.components.sidebar import show_sidebar
-from ui.components.cards import kpi_card, summary_card
-from ui.components.maps import create_sentiment_map
+from ui.components.cards import kpi_card
+from ui.components.maps import create_sentiment_map, create_clustered_map
 from config import PAGE_CONFIG, CLASSIFICATION_LABELS, CANDIDATE_LABELS_TOPIC
 from utils.preprocessing import comprehensive_text_preprocessing, extract_locations
 from models.classification import classify_document
@@ -51,7 +51,7 @@ def aggregated_analysis_page():
 
     # Process data
     df_agg = process_uploaded_data(st.session_state.uploaded_files_texts)
-    st.write("Processed Data:", df_agg)
+    # st.write("Processed Data:", df_agg)
 
     # Key Metrics
     st.markdown("### Key Metrics")
@@ -67,7 +67,9 @@ def aggregated_analysis_page():
         kpi_card("📍 Local Problems", f"{local_problems_pct:.1f}%", "")
     with kpi_col3:
         kpi_card("✨ New Initiatives", f"{new_initiatives_pct:.1f}%", "")
-
+    st.write("")  # Empty line# Add separator line
+    st.markdown("---")
+    st.write("")  # Empty line
     # Most Common Issues
     st.subheader("Most Common Issues")
     issues_df = create_issues_dataframe(df_agg)
@@ -86,8 +88,14 @@ def aggregated_analysis_page():
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # Choose one of these footnote options:
+    st.caption(
+        "This chart displays the most common issues reported, measured by the number of complaints. The percentages indicate the proportion of complaints relative to the most frequently reported issue")
+    st.write("")  # Empty line
+    # Add separator line
+    st.markdown("---")
     # Classification & Sentiment Analysis
-    st.subheader("📊 Classification Distribution & 😊 Sentiment Analysis")
+    st.subheader("📊 Category Breakdown & Mood Assessment")
     col4, col5 = st.columns(2)
 
     with col4:
@@ -97,9 +105,12 @@ def aggregated_analysis_page():
             classification_counts,
             values='count',
             names='classification',
-            title="Classification Distribution"
+            title="Letter Categories"
         )
         st.plotly_chart(fig_classification, use_container_width=True)
+        # Add footnote (choose one method)
+        st.caption(
+            "This chart displays the distribution of complaint classifications, showing the proportion of each category relative to the total number of complaints")
 
     with col5:
         sentiment_counts = df_agg["sentiment"].value_counts().reset_index()
@@ -118,38 +129,79 @@ def aggregated_analysis_page():
             labels={'count': 'Number of Letters', 'sentiment': 'Sentiment'}
         )
         st.plotly_chart(fig_sentiment, use_container_width=True)
-
-    # AI Search Section
-    st.subheader("🔍 AI Document Analyst")
-    user_question = st.text_input(
-        "Ask anything about the letters:",
-        placeholder="e.g. What are the main complaints about waste management?"
-    )
-    if user_question:
-        with st.spinner("Analyzing documents..."):
-            response = ai_question_answer(
-                user_question,
-                st.session_state.uploaded_files_texts
-            )
-            st.markdown(f"""
-            <div style='
-                padding: 15px;
-                border-radius: 10px;
-                background-color: #f0f2f6;
-                margin: 10px 0;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            '>
-                <p style='font-size: 16px; color: #333;'>{response}</p>
-            </div>
-            """, unsafe_allow_html=True)
+        # Add footnote (choose one method)
+        st.caption(
+            "The sentiment distribution of the uploaded letters is based on 35 total entries, with 20 letters (57%) classified as positive and 15 letters (43%) as negative")
+    st.write("")  # Empty line
+    st.markdown("---") # Add separator line
+    st.write("")  # Empty line
 
     # Map Visualization
     st.subheader("📍 Geographic Issue Distribution")
-    deck = create_sentiment_map(df_agg)
-    if deck:
-        st.pydeck_chart(deck)
-    else:
-        st.warning("No geographic data available for mapping.")
+
+    # Add after processing df_agg
+
+    # st.write("Data Sample:", df_agg[["text", "lat", "lon", "sentiment", "Topic", "Issue"]].head())
+    # st.write("Null Values:", df_agg[["lat", "lon", "Topic", "Issue"]].isnull().sum())
+
+    # Bolsover district coordinates (approximate center)
+    BOLSOVER_COORDS = {
+        "lat": 53.23,  # Approximate latitude
+        "lon": -1.28    # Approximate longitude
+    }
+
+    # Create tabs
+    tab1, tab2, tab3 = st.tabs(["Sentiment", "Categories", "Issues"])
+
+    with tab1:
+        # st.write("### Sentiment Distribution")
+        if df_agg.empty or df_agg["lat"].isnull().all() or df_agg["lon"].isnull().all():
+            st.warning("No geographic data available for mapping.")
+        else:
+            # Create sentiment map with Bolsover focus
+            deck = create_sentiment_map(df_agg)
+            if deck:
+                # Adjust view state for Bolsover focus
+                deck.initial_view_state.latitude = BOLSOVER_COORDS["lat"]
+                deck.initial_view_state.longitude = BOLSOVER_COORDS["lon"]
+                deck.initial_view_state.zoom = 10
+                st.pydeck_chart(deck)
+            else:
+                st.warning("Could not generate sentiment map.")
+
+    with tab2:
+        # st.write("### Category Distribution")
+        if df_agg.empty or df_agg["lat"].isnull().all():
+            st.warning("No geographic data available for mapping.")
+        else:
+            # Create category map with Bolsover focus
+            deck = create_clustered_map(df_agg, filter_by_sentiment=None, filter_by_issue=None, filter_by_topic=None)
+            if deck:
+                # Adjust view state for Bolsover focus
+                deck.initial_view_state.latitude = BOLSOVER_COORDS["lat"]
+                deck.initial_view_state.longitude = BOLSOVER_COORDS["lon"]
+                deck.initial_view_state.zoom = 10
+                st.pydeck_chart(deck)
+            else:
+                st.warning("Could not generate category map.")
+
+    with tab3:
+        # st.write("### Issue/Problem Distribution")
+        if df_agg.empty or df_agg["lat"].isnull().all():
+            st.warning("No geographic data available for mapping.")
+        else:
+            # Create topic map with Bolsover focus
+            deck = create_clustered_map(df_agg, filter_by_sentiment=None, filter_by_issue=None, filter_by_topic=None)
+            if deck:
+                # Adjust view state for Bolsover focus
+                deck.initial_view_state.latitude = BOLSOVER_COORDS["lat"]
+                deck.initial_view_state.longitude = BOLSOVER_COORDS["lon"]
+                deck.initial_view_state.zoom = 10
+                st.pydeck_chart(deck)
+            else:
+                st.warning("Could not generate topic map.")
+
+
 
     # Export options
     st.subheader("Export Options")
