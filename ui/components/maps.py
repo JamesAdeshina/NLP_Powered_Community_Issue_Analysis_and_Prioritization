@@ -89,6 +89,11 @@ def create_sentiment_map(df):
         layers=[layer],
         initial_view_state=view_state,
         map_style="mapbox://styles/mapbox/light-v10" if st.get_option(
-            "theme.base") == "light" else "mapbox://styles/mapbox/dark-v10",
-        tooltip={"text": "Sentiment: {sentiment}\nAddress: {Address}"}
+            "theme.base") == "dark" else "mapbox://styles/mapbox/dark-v10",
+        tooltip={"text": "Sentiment: {sentiment}\nAddress: {location}"}
     )
+
+
+
+
+
