@@ -6406,3 +6406,937 @@ geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap
 2025-03-26 08:28:24,273 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
 2025-03-26 08:28:26,119 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.88)
 2025-03-26 08:28:27,836 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
+2025-03-26 09:02:45,161 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 09:02:45,173 - config.logging_config - INFO - Application started...
+2025-03-26 10:03:53,874 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:03:53,883 - config.logging_config - INFO - Application started...
+2025-03-26 10:05:57,604 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:05:57,606 - config.logging_config - INFO - Application started...
+2025-03-26 10:08:50,447 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:09:48,269 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:11:27,612 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:11:37,334 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:15:36,030 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:15:41,288 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:21:35,189 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:22:20,794 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:25:04,170 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:25:09,850 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:25:17,715 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:25:21,638 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:25:28,064 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:25:35,376 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:25:56,262 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:29:42,662 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:30:45,319 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:32:44,107 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:33:24,580 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:34:02,060 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:34:09,966 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:36:26,505 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:42:01,904 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:44:50,003 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:45:11,639 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:45:33,958 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:55:31,939 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:57:40,630 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:57:50,537 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:58:12,593 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:58:14,892 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:58:15,715 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 10:58:18,410 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:19,468 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:23,503 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:24,582 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:25,641 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 10:58:27,678 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:30,429 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:31,479 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:32,557 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 10:58:36,592 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:40,439 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:41,520 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 10:58:42,572 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 10:58:51,878 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.92)
+2025-03-26 10:58:56,256 - models.sentiment - INFO - Analyzed sentiment: NEGATIVE (confidence: 0.93)
+2025-03-26 10:58:59,519 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
+2025-03-26 10:59:01,852 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
+2025-03-26 10:59:03,904 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.88)
+2025-03-26 10:59:05,940 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
+2025-03-26 11:06:18,041 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:06:21,303 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:06:26,293 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:06:28,625 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:06:40,940 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:06:42,301 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:06:43,100 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:08:08,193 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:08:16,483 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:08:17,703 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:08:27,277 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:08:30,507 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:08:33,822 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:08:43,560 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
+2025-03-26 11:13:49,084 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:14:16,769 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
+2025-03-26 11:27:55,737 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:28:00,301 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:29:30,904 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:32:39,370 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:33:37,785 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:33:42,323 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:47:38,466 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:50:00,337 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 11:50:07,335 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 12:50:16,761 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 12:50:52,460 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 12:56:22,194 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 12:56:45,906 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 12:57:11,066 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 12:57:40,595 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 13:53:53,958 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 13:53:59,910 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 13:54:24,117 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 13:54:25,223 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 13:54:26,097 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 13:54:27,904 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+0AA&format=json&limit=1
+2025-03-26 13:54:29,852 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:30,896 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:34,871 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:35,915 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:36,958 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=12+High+Street%2C+Bolsover%2C+S44+0AA%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 13:54:38,966 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:40,008 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:41,053 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 13:54:42,916 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:43,964 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:45,016 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=3+Mill+Lane%2C+Bolsover%2C+S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 13:54:46,895 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+8GH&format=json&limit=1
+2025-03-26 13:54:47,941 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+8GH&format=json&limit=1
+2025-03-26 13:54:50,948 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:51,997 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:53,044 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=S44+8NB%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 13:54:55,869 - urllib3.connectionpool - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:56,911 - urllib3.connectionpool - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)")': /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1
+2025-03-26 13:54:57,959 - processing.geocoding - ERROR - Address geocoding error: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1378, in getresponse
+    response.begin()
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1278, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1134, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 871, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 482, in _request
+    resp = self.session.get(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/processing/geocoding.py", line 94, in geocode_location
+    location = geolocator.geocode(f"{location_name}, Bolsover District, UK", exactly_one=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/nominatim.py", line 297, in geocode
+    return self._call_geocoder(url, callback, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/geocoders/base.py", line 368, in _call_geocoder
+    result = self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 472, in get_json
+    resp = self._request(url, timeout=timeout, headers=headers)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/geopy/adapters.py", line 494, in _request
+    raise GeocoderUnavailable(message)
+geopy.exc.GeocoderUnavailable: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Max retries exceeded with url: /search?q=27+Market+Street%2C+Bolsover%2C+S44+4RJ%2C+Bolsover+District%2C+UK&format=json&limit=1 (Caused by ReadTimeoutError("HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=1)"))
+2025-03-26 13:55:08,336 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.92)
+2025-03-26 13:55:10,801 - models.sentiment - INFO - Analyzed sentiment: NEGATIVE (confidence: 0.93)
+2025-03-26 13:55:12,883 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
+2025-03-26 13:55:14,627 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
+2025-03-26 13:55:16,360 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.88)
+2025-03-26 13:55:18,044 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 0.99)
+2025-03-26 16:14:52,373 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:15:03,651 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-138409' coro=<WebSocketProtocol13.write_message.<locals>.wrapper() done, defined at /Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py:1086> exception=WebSocketClosedError()>
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/streamlit/web/bootstrap.py", line 345, in run
+    try:
+         
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py", line 1088, in wrapper
+    await fut
+tornado.iostream.StreamClosedError: Stream is closed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py", line 1090, in wrapper
+    raise WebSocketClosedError()
+tornado.websocket.WebSocketClosedError
+2025-03-26 16:15:05,077 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:15:21,690 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:15:22,674 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:15:25,185 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:15:30,330 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:15:31,721 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:15:32,517 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:16:11,850 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
+2025-03-26 16:17:16,796 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:17:24,876 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:17:34,445 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:17:39,949 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:17:45,021 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:17:46,203 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:17:47,559 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:18:26,840 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
+2025-03-26 16:19:52,421 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:19:57,776 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:19:59,374 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:20:03,238 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:20:12,190 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:20:41,351 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:20:41,455 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:20:43,727 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:23:10,407 - models.sentiment - INFO - Analyzed sentiment: NEGATIVE (confidence: 1.00)
+2025-03-26 16:26:57,974 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:27:04,803 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:27:05,763 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:27:08,494 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:27:24,801 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:27:25,918 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:27:26,756 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-03-26 16:27:53,823 - models.sentiment - INFO - Analyzed sentiment: NEGATIVE (confidence: 1.00)
