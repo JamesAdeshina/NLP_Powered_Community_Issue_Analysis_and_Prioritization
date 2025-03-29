@@ -5,31 +5,80 @@ def card_style():
     st.markdown(
         """
         <style>
-        .card {
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-            transition: 0.3s;
-            border-radius: 5px;
-            padding: 16px;
-            margin: 10px 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
+        .keytakeaways-card {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 23px 20px;
+            gap: 10px;
+            isolation: isolate;
+            width: 100%;
+            min-height: 277px;
+            background: linear-gradient(0deg, #87DB5A, #87DB5A), #FAFAFA;
+            border-radius: 20px;
+            margin-bottom: 20px;
         }
-        .card:hover {
-            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+
+        .highlighted-card {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 23px 20px;
+            gap: 10px;
+            isolation: isolate;
+            width: 100%;
+            min-height: 277px;
+            background: #FFD76A;
+            border-radius: 20px;
+            margin-bottom: 20px;
         }
-        [data-theme="light"] .card {
-            --background-color: #F0F2F6;
-            --text-color: #000000;
+
+        .card-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 15px;
         }
-        [data-theme="dark"] .card {
-            --background-color: #262730;
-            --text-color: #FFFFFF;
+
+        .card-content {
+            font-size: 16px;
+            line-height: 1.5;
         }
+
+        .highlighted-content {
+            font-size: 16px;
+            line-height: 1.5;
+            padding-left: 0;
+        }
+
+
         </style>
         """,
         unsafe_allow_html=True,
     )
 
+
+def keytakeaways_card(title, content):
+    card_style()
+    st.markdown(f"""
+        <div class="keytakeaways-card">
+            <div>
+                <div class="card-title">{title}</div>
+                <div class="card-content">{content}</div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+
+def highlighted_card(title, content):
+    card_style()
+    st.markdown(f"""
+        <div class="highlighted-card">
+            <div>
+                <div class="card-title">{title}</div>
+                <ul class="highlighted-content">{content}</ul>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
 def summary_card(title, content):
     card_style()
