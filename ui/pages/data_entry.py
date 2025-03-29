@@ -13,6 +13,16 @@ def data_entry_page():
 
     if data_mode == "Paste Text":
         input_text = st.text_area("Paste your letter text here", height=200)
+        # Analysis options preview
+        with st.expander("Available Analyses for Individual Letters"):
+            st.markdown("""
+            - **Letter Classification**: Identifies as "Local Problem" or "New Initiative"
+            - **Topic Detection**: Key problem/issue highlighted
+            - **Key Takeaways**: Abstractive summary of key points
+            - **Highlighted Sentences**: Extractive summarization
+            - **Query-Based Summarization**: Responses to specific queries
+            - **Sentiment Analysis**: Positive/Negative with confidence levels
+            """)
     else:
         uploaded_files = st.file_uploader(
             "Upload files (txt, pdf, doc, docx)",
@@ -20,6 +30,15 @@ def data_entry_page():
             accept_multiple_files=True,
             key="file_uploader"  # Add key for better session state management
         )
+        # Bulk analysis preview
+        with st.expander("Available Analyses for Bulk Uploads"):
+            st.markdown("""
+            - **Key Metrics**: Total letters, breakdown by category
+            - **Common Issues**: Bar chart of most frequent problems
+            - **Classification Distribution**: Pie charts by category/sentiment
+            - **Geographic Distribution**: Map visualization of issues
+            - **AI Document Analyst**: Interactive Q&A about letters
+            """)
 
     if st.button("Submit"):
         with st.spinner("Processing..."):
