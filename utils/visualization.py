@@ -41,7 +41,14 @@ def plot_sentiment_gauge(confidence):
             dict(x=0.50, y=0.1, text="<b>Medium</b>", showarrow=False,
                  font=dict(color="yellow", size=12)),
             dict(x=0.85, y=0.1, text="<b>High</b>", showarrow=False,
-                 font=dict(color="green", size=12))
+                 font=dict(color="green", size=12)),
+            # --- Footnote Annotation ---
+            dict(
+                x=0.5, y=-0.15,  # adjust y to control how far below the gauge it appears
+                text="This gauge represents sentiment confidence indicating the degree of certainty in sentiment analysis.",
+                showarrow=False,
+                font=dict(color="gray", size=10)
+            )
         ]
     )
     return fig
