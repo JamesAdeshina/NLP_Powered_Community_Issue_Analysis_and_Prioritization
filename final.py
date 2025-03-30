@@ -37,6 +37,7 @@ from rake_nltk import Rake
 from transformers import pipeline
 from sentence_transformers import SentenceTransformer, util
 from transformers import AutoTokenizer, AutoModelForTokenClassification
+from transformers import pipeline as hf_pipeline
 
 # ------------------ Map Visualization ------------------
 from geopy.geocoders import Nominatim
