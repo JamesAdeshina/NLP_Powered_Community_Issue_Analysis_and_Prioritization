@@ -4,7 +4,7 @@ from processing.topics import compute_topic
 from models.summarization import get_summaries
 from models.sentiment import sentiment_analysis
 from ui.components.sidebar import show_sidebar
-from ui.components.cards import summary_card
+from ui.components.cards import keytakeaways_card, highlighted_card
 from ui.components.reports import get_export_options
 from utils.visualization import plot_sentiment_gauge
 from utils.nlp_utils import query_based_summarization, personalize_summary  # Added missing imports
@@ -37,45 +37,58 @@ def results_page():
     show_sidebar(st.session_state.get("uploaded_file_info", {}), letter_text)
 
     # Classification
-    st.subheader("Classification")
+    st.subheader("🏷️ Classification")
     letter_class = classify_document(letter_text)
     st.write(f"This letter is classified as: **{letter_class}**")
 
     # Topic
     st.subheader("Topic")
     topic_label, top_keywords = compute_topic(letter_text)
-    st.write(f"Topic: **{topic_label}**")
+    st.write(f"The main topic extracted is: **{topic_label}**")
 
     # Summaries
     summaries = get_summaries(letter_text)
 
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("💡 Key Takeaways")
-        summary_card("Abstractive Summary", summaries["abstractive"])
+        keytakeaways_card("💡 Key Takeaways", summaries["abstractive"])
     with col2:
-        st.subheader("🔍 Highlighted Sentences")
-        summary_card("Extractive Summary", summaries["extractive"])
+        highlighted_card("🔍 Highlighted Sentences", summaries["extractive"])
 
     # Query-based summary
-    st.subheader("❓ Inquisitive Summary")
+    st.subheader("❓ Inquiry-Driven Insights")
     user_query = st.text_input("Ask anything about the letters:", "What actions are being urged in the letter?")
     query_summary = query_based_summarization(letter_text, query=user_query)
     st.write(personalize_summary(query_summary, "query"))
 
     # Sentiment analysis
-    st.subheader("🗣️ Resident Mood Overview")
+    st.subheader("🗣️ Tone of Letter")
     sentiment_results = sentiment_analysis(letter_text)
+
+    def format_sentiment_label(label: str) -> str:
+        label = label.upper()
+        if label == "NEGATIVE":
+            return "🔴 Negative"
+        elif label == "POSITIVE":
+            return "🟢 Positive"
+        elif label == "NEUTRAL":
+            return "🟡 Neutral"
+        else:
+            return label
 
     # Safely get sentiment label with fallback
     sentiment_label = sentiment_results.get('sentiment_label', 'NEUTRAL')
+    formatted_label = format_sentiment_label(sentiment_label)
+
     explanation = sentiment_results.get('explanation', 'Sentiment analysis not available')
     confidence = sentiment_results.get('confidence', 0.5)
+    #🟢🔴🟡
 
     col_mood, col_gauge = st.columns(2)
     with col_mood:
-        st.write(f"**Mood:** {sentiment_results['sentiment_label']}")
         st.write(sentiment_results['explanation'])
+        st.write(f"**The Mood of the text is:** {formatted_label}")
+        st.write(f"{sentiment_results['note']}")
     with col_gauge:
         gauge_fig = plot_sentiment_gauge(sentiment_results['confidence'])
         st.plotly_chart(gauge_fig)
