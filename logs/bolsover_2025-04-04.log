@@ -1,0 +1,42 @@
+2025-04-04 11:37:57,001 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-7154' coro=<WebSocketProtocol13.write_message.<locals>.wrapper() done, defined at /Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py:1086> exception=WebSocketClosedError()>
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/streamlit/web/bootstrap.py", line 345, in run
+    if asyncio.get_running_loop().is_running():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py", line 1088, in wrapper
+    await fut
+tornado.iostream.StreamClosedError: Stream is closed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py", line 1090, in wrapper
+    raise WebSocketClosedError()
+tornado.websocket.WebSocketClosedError
+2025-04-04 13:43:27,118 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-22127' coro=<WebSocketProtocol13.write_message.<locals>.wrapper() done, defined at /Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py:1086> exception=WebSocketClosedError()>
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/streamlit/web/bootstrap.py", line 345, in run
+    if asyncio.get_running_loop().is_running():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py", line 1088, in wrapper
+    await fut
+tornado.iostream.StreamClosedError: Stream is closed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/apple2015/Documents/Work/Bolsover District Council/Project/.venv/lib/python3.11/site-packages/tornado/websocket.py", line 1090, in wrapper
+    raise WebSocketClosedError()
+tornado.websocket.WebSocketClosedError
