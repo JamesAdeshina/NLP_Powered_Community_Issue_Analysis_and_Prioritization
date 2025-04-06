@@ -1,11 +1,23 @@
 from config import CLASSIFICATION_LABELS
 from models.load_models import get_zero_shot_classifier
+import logging
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 
 def classify_document(text):
-    classifier = get_zero_shot_classifier()
-    result = classifier(text, CLASSIFICATION_LABELS)
-    return result["labels"][0]
+    logger.info("Starting document classification")
+    logger.debug(f"Document text: {text[:100]}...")  # Log a truncated version of the input text for readability
+    try:
+        classifier = get_zero_shot_classifier()
+        result = classifier(text, CLASSIFICATION_LABELS)
+        classification = result["labels"][0]
+        logger.info(f"Document classified as: {classification}")
+        return classification
+    except Exception as e:
+        logger.error(f"Error during document classification: {e}")
+        raise
 
 
 def unsupervised_classification(texts, num_clusters=2):
