@@ -1,16 +1,39 @@
 import streamlit as st
 import base64
 import os
+import logging
+
+# Initialize logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 
 def get_base64_of_bin_file(img_path):
-    with open(img_path, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+    """
+    Convert an image file to base64 encoding.
+    """
+    try:
+        logger.info(f"Loading image file from: {img_path}")
+        with open(img_path, 'rb') as f:
+            data = f.read()
+        encoded_image = base64.b64encode(data).decode()
+        logger.info(f"Successfully loaded image: {img_path}")
+        return encoded_image
+    except Exception as e:
+        logger.error(f"Error loading image file {img_path}: {e}")
+        raise
+
 
 def set_bg_from_local(img_path):
     """
     Set the background image from a local file path.
     """
+    logger.info(f"Setting background image from: {img_path}")
     img_base64 = get_base64_of_bin_file(img_path)
     page_bg_img = f"""
     <style>
@@ -24,12 +47,20 @@ def set_bg_from_local(img_path):
     </style>
     """
     st.markdown(page_bg_img, unsafe_allow_html=True)
+    logger.info(f"Background image set successfully from: {img_path}")
+
 
 def home_page():
+    """
+    The home page of the Bolsover District Council application.
+    """
+    logger.info("Loading home page...")
+
     # Set the full-page background
     set_bg_from_local("src/img/background_img.png")
 
     # Custom CSS for layout and button styling
+    logger.info("Applying custom CSS for layout and button styling...")
     st.markdown(
         """
         <style>
@@ -47,16 +78,16 @@ def home_page():
             color: white;
             border-radius: 8px;
         }
-                /* Center all images */
+        /* Center all images */
         .stImage {
             display: flex;
             justify-content: center !important;
         }
-            .rounded-image {
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        margin: 20px 0;
-        transition: transform 0.3s;
+        .rounded-image {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            transition: transform 0.3s;
         }
         .rounded-image:hover {
             transform: scale(1.02);
@@ -65,14 +96,18 @@ def home_page():
         """,
         unsafe_allow_html=True
     )
+
     # Get base64 of the logo image
     logo_path = os.path.join("src", "img", "Bolsover_District_Council_logo.png")
+    logger.info(f"Loading logo image from: {logo_path}")
     logo_base64 = get_base64_of_bin_file(logo_path)
 
     # Get base64 of the Bolsover image
     bolsover_path = os.path.join("src", "img", "Bolsover.png")
+    logger.info(f"Loading Bolsover image from: {bolsover_path}")
     bolsover_base64 = get_base64_of_bin_file(bolsover_path)
 
+    # Display the logo image
     st.markdown(
         f"""
         <div style="text-align:center;">
@@ -96,13 +131,16 @@ def home_page():
 
     st.write("")
     st.write("")
-    # st.write("Welcome to Bolsover District Council’s Public Letters Portal. Click below to continue.")
 
+    # Log button click event
     def go_to_data_entry():
+        logger.info("Continue button clicked, navigating to data entry page.")
         st.session_state.page = "data_entry"
 
     if st.button("Continue", on_click=go_to_data_entry):
         pass
+
+    logger.info("Home page loaded successfully.")
 
 
 if __name__ == "__main__":
