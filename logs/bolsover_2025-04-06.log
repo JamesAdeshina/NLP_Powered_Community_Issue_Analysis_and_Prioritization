@@ -35,3 +35,4 @@
 2025-04-06 23:55:54,044 - models.load_models - INFO - Loading Sentiment Analysis model
 2025-04-06 23:55:54,471 - models.load_models - INFO - Sentiment Analysis model loaded successfully
 2025-04-06 23:55:55,311 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
+2025-04-07 00:01:30,318 - config.logging_config - INFO - Starting Bolsover District Council application
