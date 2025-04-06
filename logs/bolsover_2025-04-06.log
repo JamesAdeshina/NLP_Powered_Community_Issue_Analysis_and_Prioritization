@@ -9,3 +9,14 @@
 2025-04-06 23:32:35,745 - config.logging_config - INFO - Starting Bolsover District Council application
 2025-04-06 23:32:36,389 - config.logging_config - INFO - Starting Bolsover District Council application
 2025-04-06 23:34:15,242 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
+2025-04-06 23:40:21,601 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:34,282 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:41,392 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:45,175 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:48,657 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:52,951 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:54,083 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:54,954 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:40:54,988 - models.classification - INFO - Starting document classification
+2025-04-06 23:41:04,361 - models.classification - INFO - Document classified as: Local Problem
+2025-04-06 23:41:25,591 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
