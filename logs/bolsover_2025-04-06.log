@@ -8,3 +8,4 @@
 2025-04-06 23:32:34,209 - config.logging_config - INFO - Starting Bolsover District Council application
 2025-04-06 23:32:35,745 - config.logging_config - INFO - Starting Bolsover District Council application
 2025-04-06 23:32:36,389 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:34:15,242 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
