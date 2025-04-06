@@ -42,18 +42,27 @@ def unsupervised_classification(texts, num_clusters=2):
 
 
 def dynamic_label_clusters(vectorizer, kmeans):
-    from models.load_models import get_zero_shot_classifier
-    from config import CLASSIFICATION_LABELS
+    logger.info("Starting dynamic label clustering")
+    try:
+        from models.load_models import get_zero_shot_classifier
+        from config import CLASSIFICATION_LABELS
 
-    cluster_labels = {}
-    order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
-    terms = vectorizer.get_feature_names_out()
+        cluster_labels = {}
+        order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
+        terms = vectorizer.get_feature_names_out()
+        logger.debug("Cluster centroids and terms extracted")
 
-    for i in range(kmeans.n_clusters):
-        top_terms = [terms[ind] for ind in order_centroids[i, :10]]
-        keyword_str = ", ".join(top_terms)
-        classifier = get_zero_shot_classifier()
-        result = classifier(keyword_str, CLASSIFICATION_LABELS)
-        cluster_labels[i] = result["labels"][0]
+        for i in range(kmeans.n_clusters):
+            top_terms = [terms[ind] for ind in order_centroids[i, :10]]
+            keyword_str = ", ".join(top_terms)
+            logger.debug(f"Cluster {i} keywords: {keyword_str}")
 
-    return cluster_labels
+            classifier = get_zero_shot_classifier()
+            result = classifier(keyword_str, CLASSIFICATION_LABELS)
+            cluster_labels[i] = result["labels"][0]
+            logger.info(f"Cluster {i} labeled as: {cluster_labels[i]}")
+
+        return cluster_labels
+    except Exception as e:
+        logger.error(f"Error during dynamic label clustering: {e}")
+        raise
