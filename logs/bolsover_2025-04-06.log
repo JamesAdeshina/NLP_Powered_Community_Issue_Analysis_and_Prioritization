@@ -20,3 +20,18 @@
 2025-04-06 23:40:54,988 - models.classification - INFO - Starting document classification
 2025-04-06 23:41:04,361 - models.classification - INFO - Document classified as: Local Problem
 2025-04-06 23:41:25,591 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
+2025-04-06 23:54:15,189 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:54:32,234 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:55:18,512 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:55:23,391 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:55:24,074 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:55:24,882 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-06 23:55:24,925 - models.classification - INFO - Starting document classification
+2025-04-06 23:55:24,927 - models.load_models - INFO - Loading Zero-Shot Classifier model
+2025-04-06 23:55:27,318 - models.load_models - INFO - Zero-Shot Classifier model loaded successfully
+2025-04-06 23:55:36,885 - models.classification - INFO - Document classified as: Local Problem
+2025-04-06 23:55:36,889 - models.load_models - INFO - Loading Abstractive Summarizer model
+2025-04-06 23:55:43,973 - models.load_models - INFO - Abstractive Summarizer model loaded successfully
+2025-04-06 23:55:54,044 - models.load_models - INFO - Loading Sentiment Analysis model
+2025-04-06 23:55:54,471 - models.load_models - INFO - Sentiment Analysis model loaded successfully
+2025-04-06 23:55:55,311 - models.sentiment - INFO - Analyzed sentiment: POSITIVE (confidence: 1.00)
