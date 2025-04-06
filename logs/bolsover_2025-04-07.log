@@ -1,0 +1,16 @@
+2025-04-07 00:13:42,436 - config.logging_config - INFO - Starting Bolsover District Council application
+2025-04-07 00:13:42,438 - ui.pages.home - INFO - Loading home page...
+2025-04-07 00:13:42,438 - ui.pages.home - INFO - Setting background image from: src/img/background_img.png
+2025-04-07 00:13:42,438 - ui.pages.home - INFO - Loading image file from: src/img/background_img.png
+2025-04-07 00:13:42,447 - ui.pages.home - INFO - Successfully loaded image: src/img/background_img.png
+2025-04-07 00:13:43,017 - ui.pages.home - INFO - Background image set successfully from: src/img/background_img.png
+2025-04-07 00:13:43,018 - ui.pages.home - INFO - Applying custom CSS for layout and button styling...
+2025-04-07 00:13:43,018 - ui.pages.home - INFO - Loading logo image from: src/img/Bolsover_District_Council_logo.png
+2025-04-07 00:13:43,021 - ui.pages.home - INFO - Loading image file from: src/img/Bolsover_District_Council_logo.png
+2025-04-07 00:13:43,024 - ui.pages.home - INFO - Successfully loaded image: src/img/Bolsover_District_Council_logo.png
+2025-04-07 00:13:43,030 - ui.pages.home - INFO - Loading Bolsover image from: src/img/Bolsover.png
+2025-04-07 00:13:43,032 - ui.pages.home - INFO - Loading image file from: src/img/Bolsover.png
+2025-04-07 00:13:43,203 - ui.pages.home - INFO - Successfully loaded image: src/img/Bolsover.png
+2025-04-07 00:13:43,813 - ui.pages.home - INFO - Home page loaded successfully.
+2025-04-07 00:14:26,558 - ui.pages.home - INFO - Continue button clicked, navigating to data entry page.
+2025-04-07 00:14:26,561 - config.logging_config - INFO - Starting Bolsover District Council application
