@@ -21,14 +21,24 @@ def classify_document(text):
 
 
 def unsupervised_classification(texts, num_clusters=2):
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.cluster import KMeans
+    logger.info(f"Starting unsupervised classification with {num_clusters} clusters")
+    logger.debug(f"Number of texts to classify: {len(texts)}")
+    try:
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.cluster import KMeans
 
-    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000, ngram_range=(1, 2))
-    X = vectorizer.fit_transform(texts)
-    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-    kmeans.fit(X)
-    return kmeans.labels_, vectorizer, kmeans
+        vectorizer = TfidfVectorizer(stop_words='english', max_features=1000, ngram_range=(1, 2))
+        X = vectorizer.fit_transform(texts)
+        logger.debug("TF-IDF matrix created")
+
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        kmeans.fit(X)
+        logger.info("Clustering completed")
+
+        return kmeans.labels_, vectorizer, kmeans
+    except Exception as e:
+        logger.error(f"Error during unsupervised classification: {e}")
+        raise
 
 
 def dynamic_label_clusters(vectorizer, kmeans):
