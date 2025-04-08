@@ -6,7 +6,6 @@ from PIL import Image
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from processing.ocr_file_reader import (
     extract_text_from_image,
-    extract_text_from_docx,
     extract_text_from_pdf,
 )
 
@@ -29,8 +28,6 @@ with st.spinner("Extracting text..."):
     try:
         if "pdf" in file_type:
             text = extract_text_from_pdf(uploaded_file.read())
-        elif "word" in file_type or uploaded_file.name.endswith(".docx"):
-            text = extract_text_from_docx(uploaded_file)
         elif "image" in file_type:
             image = Image.open(uploaded_file)
             text = extract_text_from_image(image)
