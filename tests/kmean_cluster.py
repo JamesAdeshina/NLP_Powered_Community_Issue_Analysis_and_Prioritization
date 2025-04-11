@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Example dataset
 existing_data = np.array([ [22, 1], [25, 2], [30, 5], [40, 10], [45, 15], [50, 20], [55, 25], [60, 30] ])  # Features: [Age, Experience]
-new_data = np.array([[52, 12]])  # New applicant
+new_data = np.array([[52, 300]])  # New applicant
 
 # Cluster 0: "Junior Applicants" (young, less experienced).
 # Cluster 1: "Senior Applicants" (older, more experienced).
